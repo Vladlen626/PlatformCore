@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using PlatformCore.Infrastructure;
 using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services
@@ -10,134 +8,95 @@ namespace PlatformCore.Services
 	public class SceneService : BaseAsyncService, ISceneService
 	{
 		private readonly ILoggerService _loggerService;
-		private Dictionary<string, AsyncOperation> _preloadedScenes = new();
+		private readonly PersistentSceneContext _persistentSceneContext;
 
-		public SceneService(ILoggerService loggerService)
+		public SceneService(ILoggerService loggerService, PersistentSceneContext persistentSceneContext)
 		{
 			_loggerService = loggerService;
+			_persistentSceneContext = persistentSceneContext;
 		}
 
-		public async UniTask PreloadSceneAsync(string sceneName, CancellationToken ct = default)
+		public string PersistentSceneName
 		{
-			var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-			if (operation != null)
+			get
 			{
-				operation.allowSceneActivation = false;
-
-				_preloadedScenes[sceneName] = operation;
-
-				while (operation.progress < 0.9f)
+				if (!_persistentSceneContext)
 				{
-					await UniTask.Yield(cancellationToken: ct);
+					return string.Empty;
 				}
+
+				return _persistentSceneContext.Scene.name;
 			}
 		}
 
-		public async UniTask ActivatePreloadedScene(string sceneName)
-		{
-			if (_preloadedScenes.TryGetValue(sceneName, out var op))
-			{
-				op.allowSceneActivation = true;
-				await op.ToUniTask();
-
-				SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
-				_preloadedScenes.Remove(sceneName);
-			}
-			else
-			{
-				throw new Exception($"Scene {sceneName} not preloaded!");
-			}
-		}
+		public ISceneContext PersistentContext => _persistentSceneContext;
 
 		public async UniTask LoadSceneAsync(string sceneName, CancellationToken ct = default)
 		{
-			await LoadSceneAsync(sceneName, LoadSceneMode.Additive, ct);
-		}
-		
-		public async UniTask LoadSceneAsync(string sceneName, LoadSceneMode mode,
-			CancellationToken ct = default)
-		{
-			_loggerService?.Log($"[SceneService] Loading scene: {sceneName} (mode: {mode})");
-
-			if (string.IsNullOrEmpty(sceneName))
+			if (IsSceneLoaded(sceneName))
 			{
-				var error = "[SceneService] Scene name is null or empty";
-				_loggerService?.LogError(error);
-				throw new ArgumentException(error, nameof(sceneName));
+				_loggerService?.Log($"[SceneService] Scene already loaded: {sceneName}");
+				return;
 			}
 
-			try
-			{
-				var operation = SceneManager.LoadSceneAsync(sceneName, mode);
-
-				if (operation == null)
-				{
-					throw new InvalidOperationException($"Failed to start loading scene: {sceneName}");
-				}
-
-				if (mode == LoadSceneMode.Single)
-				{
-					SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
-				}
-				
-				
-				await operation.ToUniTask(cancellationToken: ct);
-
-				_loggerService?.Log($"[SceneService] Scene loaded successfully: {sceneName}");
-			}
-			catch (OperationCanceledException)
-			{
-				_loggerService?.Log($"[SceneService] Scene loading cancelled: {sceneName}");
-				throw;
-			}
-			catch (Exception ex)
-			{
-				_loggerService?.LogError($"[SceneService] Failed to load scene: {sceneName}. Error: {ex.Message}");
-				throw;
-			}
+			_loggerService?.Log($"[SceneService] Loading scene: {sceneName}");
+			var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+			await operation.ToUniTask(cancellationToken: ct);
+			_loggerService?.Log($"[SceneService] Scene loaded successfully: {sceneName}");
 		}
 
-		public async UniTask ReloadCurrentSceneAsync(CancellationToken ct = default)
+		public async UniTask LoadAndSetActiveSceneAsync(string sceneName, CancellationToken ct = default)
 		{
-			var currentSceneName = GetActiveSceneName();
-			_loggerService?.Log($"[SceneService] Reloading current scene: {currentSceneName}");
-
-			await LoadSceneAsync(currentSceneName, LoadSceneMode.Single, ct);
+			await LoadSceneAsync(sceneName, ct);
+			TrySetActiveScene(sceneName);
 		}
 
-		public void SetActiveScene(string sceneName)
+		public bool TrySetActiveScene(string sceneName)
 		{
-			SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
+			if (!IsSceneLoaded(sceneName))
+			{
+				_loggerService?.LogWarning($"[SceneService] Cannot set active scene, scene is not loaded: {sceneName}");
+				return false;
+			}
+
+			var scene = SceneManager.GetSceneByName(sceneName);
+			var result = SceneManager.SetActiveScene(scene);
+			if (result)
+			{
+				_loggerService?.Log($"[SceneService] Active scene set: {sceneName}");
+			}
+			else
+			{
+				_loggerService?.LogWarning($"[SceneService] Failed to set active scene: {sceneName}");
+			}
+
+			return result;
 		}
 
 		public async UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default)
 		{
-			_loggerService?.Log($"[SceneService] Unloading scene: {sceneName}");
-
-			if (string.IsNullOrEmpty(sceneName))
-			{
-				_loggerService?.LogError("[SceneService] Scene name is null or empty");
-				throw new ArgumentException("Scene name cannot be null or empty", nameof(sceneName));
-			}
-
 			if (!IsSceneLoaded(sceneName))
 			{
 				_loggerService?.LogWarning($"[SceneService] Scene not loaded, cannot unload: {sceneName}");
 				return;
 			}
 
-			try
+			if (sceneName == PersistentSceneName)
 			{
-				var operation = SceneManager.UnloadSceneAsync(sceneName);
-				await operation.ToUniTask(cancellationToken: ct);
+				_loggerService?.LogWarning($"[SceneService] Persistent scene cannot be unloaded: {sceneName}");
+				return;
+			}
 
-				_loggerService?.Log($"[SceneService] Scene unloaded successfully: {sceneName}");
-			}
-			catch (Exception ex)
+			var activeSceneName = GetActiveSceneName();
+			if (activeSceneName == sceneName)
 			{
-				_loggerService?.LogError($"[SceneService] Failed to unload scene: {sceneName}. Error: {ex.Message}");
-				throw;
+				TrySetActiveScene(PersistentSceneName);
 			}
+
+			_loggerService?.Log($"[SceneService] Unloading scene: {sceneName}");
+			var operation = SceneManager.UnloadSceneAsync(sceneName);
+			await operation.ToUniTask(cancellationToken: ct);
+			_loggerService?.Log($"[SceneService] Scene unloaded successfully: {sceneName}");
 		}
 
 		public string GetActiveSceneName()
@@ -149,6 +108,12 @@ namespace PlatformCore.Services
 		{
 			sceneContext = null;
 
+			if (sceneName == PersistentSceneName)
+			{
+				sceneContext = _persistentSceneContext;
+				return sceneContext != null;
+			}
+
 			var scene = SceneManager.GetSceneByName(sceneName);
 			if (!scene.IsValid() || !scene.isLoaded)
 			{
@@ -156,7 +121,7 @@ namespace PlatformCore.Services
 			}
 
 			var roots = scene.GetRootGameObjects();
-			for (int i = 0; i < roots.Length; i++)
+			for (var i = 0; i < roots.Length; i++)
 			{
 				if (roots[i].TryGetComponent<ISceneContext>(out var ctx))
 				{
@@ -185,7 +150,9 @@ namespace PlatformCore.Services
 			{
 				var scene = SceneManager.GetSceneAt(i);
 				if (scene.name == sceneName && scene.isLoaded)
+				{
 					return true;
+				}
 			}
 
 			return false;
