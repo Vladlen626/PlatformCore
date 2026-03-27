@@ -2,8 +2,12 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace PlatformCore.Services
+namespace PlatformCore.Services.Factory
 {
+	/// <summary>
+	/// Platform-level runtime service for loading/unloading assets from Resources.
+	/// Does not own project-specific resource maps.
+	/// </summary>
 	public class ResourceService : BaseAsyncService, IResourceService
 	{
 		private readonly ILoggerService _loggerService;
@@ -21,10 +25,11 @@ namespace PlatformCore.Services
 
 			await request;
 
-			if (request.asset == null)
+			if (!request.asset)
 			{
 				_loggerService?.Log($"[ResourceService] Failed to load: {path}");
-				_loggerService?.LogError($"Possible reasons: 1) File not in Resources folder, 2) Wrong path, 3) Wrong type");
+				_loggerService?.LogError("Possible reasons: 1) File not in Resources folder, 2) Wrong path, 3) Wrong type");
+				return null;
 			}
 
 			_loggerService?.Log($"[ResourceService] Loaded: {path}");
