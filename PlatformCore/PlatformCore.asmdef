@@ -1,0 +1,13 @@
+{
+  "name": "PlatformCore",
+  "references":[ 
+    "UniTask",
+    "TMPEffects",
+    "Unity.TextMeshPro",
+    "FMODUnity",
+    "Unity.Cinemachine",
+    "UnitySplines",
+    "DOTween.Modules",
+    "Newtonsoft.Json"
+  ]
+}
