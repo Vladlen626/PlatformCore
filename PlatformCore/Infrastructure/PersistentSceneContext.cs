@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using PlatformCore.Services.UI;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public class PersistentSceneContext : MonoBehaviour
 	{

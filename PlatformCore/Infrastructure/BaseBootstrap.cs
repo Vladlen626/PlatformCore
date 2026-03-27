@@ -1,7 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	[RequireComponent(typeof(PersistentSceneContext))]
 	public abstract class BaseBootstrap : MonoBehaviour

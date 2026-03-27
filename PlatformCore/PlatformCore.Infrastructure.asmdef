@@ -1,5 +1,5 @@
 {
-  "name": "PlatformCore",
+  "name": "PlatformCore.Infrastructure",
   "references":[ 
     "UniTask",
     "TMPEffects",
@@ -8,6 +8,7 @@
     "Unity.Cinemachine",
     "UnitySplines",
     "DOTween.Modules",
+    "PlatformCore.Core",
     "Newtonsoft.Json"
   ]
 }

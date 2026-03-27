@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using PlatformCore.Services;
+using PlatformCore.Core;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public static class ServiceLocatorExtensions
 	{

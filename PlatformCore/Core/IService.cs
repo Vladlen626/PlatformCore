@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace PlatformCore.Services
+namespace PlatformCore.Core
 {
 	public interface IService : IDisposable
 	{

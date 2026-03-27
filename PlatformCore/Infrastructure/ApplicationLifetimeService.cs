@@ -2,7 +2,7 @@
 using System.Threading;
 using UnityEngine;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public class ApplicationLifetimeService : IDisposable
 	{

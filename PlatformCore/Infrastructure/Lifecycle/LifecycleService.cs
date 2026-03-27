@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
-using PlatformCore.Services;
+using PlatformCore.Core.Lifecycle;
 
-namespace PlatformCore.Infrastructure.Lifecycle
+namespace PlatformCore.Infrastructure
 {
 	public class LifecycleService : IService
 	{
@@ -34,32 +33,49 @@ namespace PlatformCore.Infrastructure.Lifecycle
 				return;
 			}
 
-			_managedObjects.Add(controller);
+			var activated = false;
 
-			if (controller is IPreloadable preloadable)
+			try
 			{
-				await preloadable.PreloadAsync();
+				if (controller is IPreloadable preloadable)
+				{
+					await preloadable.PreloadAsync();
+				}
+
+				if (controller is IActivatable activatable)
+				{
+					activatable.Activate();
+					activated = true;
+				}
+
+				_managedObjects.Add(controller);
+
+				// Контроллер может реализовывать сразу несколько update-интерфейсов.
+				if (controller is IUpdatable updatable)
+				{
+					_updatables.Add(updatable);
+				}
+
+				if (controller is IFixedUpdatable fixedUpdatable)
+				{
+					_fixedUpdatables.Add(fixedUpdatable);
+				}
+
+				if (controller is ILateUpdatable lateUpdatable)
+				{
+					_lateUpdatables.Add(lateUpdatable);
+				}
 			}
-
-			if (controller is IActivatable activatable)
+			catch
 			{
-				activatable.Activate();
-			}
+				_managedObjectsSet.Remove(controller);
 
-			// Контроллер может реализовывать сразу несколько update-интерфейсов.
-			if (controller is IUpdatable updatable)
-			{
-				_updatables.Add(updatable);
-			}
+				if (activated && controller is IDeactivatable deactivatable)
+				{
+					deactivatable.Deactivate();
+				}
 
-			if (controller is IFixedUpdatable fixedUpdatable)
-			{
-				_fixedUpdatables.Add(fixedUpdatable);
-			}
-
-			if (controller is ILateUpdatable lateUpdatable)
-			{
-				_lateUpdatables.Add(lateUpdatable);
+				throw;
 			}
 		}
 
