@@ -1,0 +1,164 @@
+# PlatformCore 2.0 — Mini Spec for Milestone A
+
+Версия документа: 3.0  
+Статус: узкая спецификация первого этапа после фактического импорта foundation baseline  
+Назначение: использовать как ТЗ на ближайший реальный milestone в текущем репозитории `PlatformCore`
+
+---
+
+## 1. Цель Milestone A
+
+Milestone A теперь означает не foundation import с нуля.
+
+Foundation baseline уже импортирован в репозиторий `PlatformCore`.
+
+Поэтому цель Milestone A:
+
+- провести аудит уже импортированной базы;
+- исправить критические дефекты foundation;
+- очистить базу от лишних legacy/sample/game-specific хвостов;
+- подготовить foundation к модульному разделению;
+- не допустить преждевременного переписывания всей платформы с нуля.
+
+На выходе должен получиться **стабильный imported baseline**, готовый к следующему этапу модульного разделения и к переносу следующих platform-level подсистем.
+
+---
+
+## 2. Что входит в Milestone A
+
+### 2.1 Repo baseline audit
+
+Нужно:
+
+- зафиксировать, какие слои уже присутствуют в репозитории;
+- отметить, что является reusable platform code;
+- отметить, что является project-specific хвостом;
+- отметить, что нужно оставить, адаптировать, переписать, вынести или удалить.
+
+Минимальный результат:
+
+- markdown-файл `docs/PlatformCore_2_0_Repo_Baseline_Audit.md`.
+
+### 2.2 Lifecycle stabilization
+
+Нужно исправить текущий lifecycle baseline.
+
+Минимально обязательно:
+
+- duplicate registration guard;
+- идемпотентный unregister;
+- корректная регистрация контроллера, который реализует несколько update-интерфейсов;
+- унификация `IActivatable` / `IDeactivatable` semantics;
+- безопасный `Dispose`.
+
+### 2.3 Foundation cleanup
+
+Нужно:
+
+- отделить runtime foundation от editor-only кода;
+- определить, какие assets относятся к samples/demo;
+- не держать лишний asset payload внутри foundation слоя;
+- пересмотреть project-specific пути, enum и legacy-хардкоды.
+
+### 2.4 Assembly split preparation
+
+Нужно подготовить разрезание текущего монолита.
+
+Минимально:
+
+- выделить целевые границы `Core`, `Infrastructure`, `Editor`;
+- зафиксировать, какие внешние зависимости лишние для core;
+- подготовить asmdef split plan.
+
+---
+
+## 3. Что не входит в Milestone A
+
+Не делать в этой пачке:
+
+- gameplay systems;
+- gameplay composites;
+- gameplay UI;
+- shop / level / mission systems;
+- FishNet и любую сетевую логику;
+- полноценный settings module;
+- полноценный scene management module;
+- глобальный rewrite audio/camera/UI;
+- большой rename/refactor всего imported foundation.
+
+Допустимы только локальные исправления, которые реально нужны для стабилизации already imported baseline.
+
+---
+
+## 4. Главные правила реализации
+
+### 4.1 Baseline-first
+
+Каждая задача должна исходить из текущего состояния репозитория, а не из гипотетической чистой архитектуры.
+
+### 4.2 Fix before expand
+
+Сначала исправляем foundation, который уже есть.  
+Потом переносим новые слои.
+
+### 4.3 Не смешивать стабилизацию и большой rewrite
+
+Если задача про lifecycle stabilization, в ней не должно быть параллельного redesign UI/audio/camera.
+
+### 4.4 Не тащить gameplay в foundation cleanup
+
+Milestone A посвящён platform-level стабилизации, а не построению игровых фич.
+
+---
+
+## 5. Приоритеты Milestone A
+
+Приоритет 1:
+
+- `LifecycleService` stabilization.
+
+Приоритет 2:
+
+- baseline audit current repo state.
+
+Приоритет 3:
+
+- asmdef split plan для `Core / Infrastructure / Editor`.
+
+Приоритет 4:
+
+- cleanup sample/assets/editor payload.
+
+---
+
+## 6. Acceptance Criteria
+
+Milestone A считается завершённым, если:
+
+- текущее состояние репозитория зафиксировано в отдельном audit-документе;
+- foundation больше не содержит критических lifecycle-дефектов;
+- есть понятный и проверенный план asmdef split;
+- sample/demo/editor payload отделён концептуально и частично физически от foundation;
+- следующие этапы больше не опираются на устаревший greenfield-сценарий.
+
+---
+
+## 7. Что делать сразу после Milestone A
+
+После Milestone A следующими этапами идут:
+
+1. `Core / Infrastructure / Editor` asmdef split;
+2. `Settings` foundation;
+3. `SceneManagement` foundation;
+4. `UI` normalization;
+5. `Audio` normalization;
+6. `Camera` normalization.
+
+---
+
+## 8. Краткое резюме
+
+Milestone A теперь означает:
+
+- не «создать foundation»;
+- а «взять уже импортированный foundation baseline и привести его в устойчивое состояние».
