@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using PlatformCore.Infrastructure.Lifecycle;
+using PlatformCore.Core;
+using PlatformCore.Core.Lifecycle;
 using UnityEngine;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public abstract class BaseGameRoot : IDisposable
 	{

@@ -1,8 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
-using PlatformCore.Infrastructure.Lifecycle;
+using PlatformCore.Core;
+using PlatformCore.Core.Lifecycle;
 using PlatformCore.Services.UI;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public class BaseContextController<T> : IBaseController, IActivatable, IPreloadable where T : UIBaseElement
 	{

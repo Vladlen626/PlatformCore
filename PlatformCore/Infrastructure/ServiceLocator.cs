@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using PlatformCore.Services;
+using PlatformCore.Core;
 
-namespace PlatformCore.Core
+namespace PlatformCore.Infrastructure
 {
 	public sealed class ServiceLocator : IDisposable
 	{

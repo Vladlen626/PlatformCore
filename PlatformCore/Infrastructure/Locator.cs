@@ -1,4 +1,4 @@
-﻿namespace PlatformCore.Core
+﻿namespace PlatformCore.Infrastructure
 {
 	public static class Locator
 	{

@@ -1,0 +1,6 @@
+{
+  "name": "PlatformCore.Core",
+  "references": [
+    "UniTask"
+  ]
+}

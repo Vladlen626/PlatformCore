@@ -1,6 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 
-namespace PlatformCore.Infrastructure.Lifecycle
+namespace PlatformCore.Core.Lifecycle
 {
 	public interface IPreloadable : IDeactivatable
 	{
