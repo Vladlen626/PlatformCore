@@ -1,19 +1,21 @@
-﻿using System;
+using PlatformCore.Services;
+using PlatformCore.Services.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using PlatformCore.Services.UI;
 
 namespace PlatformCore.Infrastructure
 {
-	public class PersistentSceneContext : MonoBehaviour
+	public class PersistentSceneContext : MonoBehaviour, ISceneContext
 	{
-		public Scene scene {get; private set;}
 		[SerializeField] private UICanvasEntry[] _uiCanvases;
+
+		public Scene Scene { get; private set; }
 		public UICanvasEntry[] UICanvases => _uiCanvases;
 
 		private void Awake()
 		{
-			scene = gameObject.scene;
+			DontDestroyOnLoad(gameObject);
+			Scene = gameObject.scene;
 		}
 	}
 }

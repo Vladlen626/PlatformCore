@@ -1,18 +1,20 @@
-﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
 
 namespace PlatformCore.Services
 {
 	public interface ISceneService
 	{
-		// _____________ Base _____________
+		string PersistentSceneName { get; }
+		ISceneContext PersistentContext { get; }
+
 		UniTask LoadSceneAsync(string sceneName, CancellationToken ct = default);
+		UniTask LoadAndSetActiveSceneAsync(string sceneName, CancellationToken ct = default);
+		UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default);
+
+		bool TrySetActiveScene(string sceneName);
 		string GetActiveSceneName();
 		bool IsSceneLoaded(string sceneName);
 		bool TryGetSceneContext(string sceneName, out ISceneContext sceneContext);
-		void SetActiveScene(string sceneName);
-		UniTask UnloadSceneAsync(string sceneName, CancellationToken ct = default);
 	}
 }
