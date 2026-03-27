@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace PlatformCore.Services.Factory
 {
+	/// <summary>
+	/// Platform-level prefab instantiation contract over IResourceService.
+	/// </summary>
 	public interface IObjectFactory
 	{
 		UniTask<GameObject> CreateAsync(

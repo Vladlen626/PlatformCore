@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace PlatformCore.Services.Factory
 {
+	/// <summary>
+	/// Platform-level object creation service.
+	/// Accepts resource paths but does not own project-specific path catalogs.
+	/// </summary>
 	public class ObjectFactory : BaseAsyncService, IObjectFactory
 	{
 		private readonly IResourceService _resourceService;

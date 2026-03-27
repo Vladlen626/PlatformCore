@@ -277,7 +277,7 @@ public class GlobalNotificationService : BaseAsyncService
 
 		var parent = notificationsView.List ? notificationsView.List : notificationsView.transform;
 		var view = await objectFactory.CreateAsync<UINotificationView>(
-			ResourcePaths.UI.UINotificationView,
+			ResourcePaths.Sample.UI.UINotificationView,
 			UnityEngine.Vector3.zero,
 			UnityEngine.Quaternion.identity,
 			parent);

@@ -16,7 +16,7 @@ public class LocalizationServiceBase : BaseAsyncService, ILocalizationService
 
 	protected override async UniTask OnPreInitializeAsync(CancellationToken ct)
 	{
-		textsConfig = await configService.GetFirstOrDefaultAsync<TextsConfig>(ResourcePaths.Json.texts_eng);
+		textsConfig = await configService.GetFirstOrDefaultAsync<TextsConfig>(ResourcePaths.Sample.Json.texts_eng);
 	}
 
 	public string GetLocalized(string id)

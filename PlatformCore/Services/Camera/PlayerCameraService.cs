@@ -47,7 +47,7 @@ namespace PlatformCore.Services
 		{
 			brain = Camera.main.GetComponent<CinemachineBrain>();
 
-			var _camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Player.CinemachineCamera,
+			var _camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Sample.Player.CinemachineCamera,
 				Vector3.zero, Quaternion.identity, _cameraParent);
 			_noise = (CinemachineBasicMultiChannelPerlin)_camera.GetCinemachineComponent(CinemachineCore.Stage.Noise);
 			_camera.name = PlayerCamera;
