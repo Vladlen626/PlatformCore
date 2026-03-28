@@ -75,3 +75,7 @@
 - Prefer root-cause fixes over symptom patches: identify and validate why the bug happens before applying a fix.
 - Avoid workaround logic that masks ordering/state issues if the real source can be corrected safely.
 - If multiple approaches exist, propose one minimal recommended path first.
+- `Composite` is not the default for every new feature.
+- Use `Composite` only when there is a clear orchestration/lifetime boundary across multiple runtime parts.
+- If a feature is a single reusable runtime block, prefer controller/mode/adapter instead of creating a new `Composite`.
+- Do not introduce `Composite` just to match a pattern.
