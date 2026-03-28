@@ -9,10 +9,15 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 
 		public event Action<NetworkSessionSnapshot> SessionStateChanged;
 
-		public void UpdateSessionState(bool isServerStarted, bool isClientStarted)
+		public void UpdateSessionState(NetworkSessionSnapshot snapshot)
 		{
-			Snapshot = new NetworkSessionSnapshot(isServerStarted, isClientStarted);
-			SessionStateChanged?.Invoke(Snapshot);
+			if (Snapshot.IsServerStarted == snapshot.IsServerStarted && Snapshot.IsClientStarted == snapshot.IsClientStarted)
+			{
+				return;
+			}
+
+			Snapshot = snapshot;
+			SessionStateChanged?.Invoke(snapshot);
 		}
 
 		public void Dispose()

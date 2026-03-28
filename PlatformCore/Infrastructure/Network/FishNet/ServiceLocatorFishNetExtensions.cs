@@ -22,6 +22,10 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 			var networkSessionService = new NetworkSessionService(networkSessionBridge, loggerService);
 			serviceLocator.Register<INetworkSessionService, NetworkSessionService>(networkSessionService);
 			lifecycleService.RegisterAsync(networkSessionService).Forget();
+
+			var runtimeSessionAdapter = new FishNetRuntimeSessionAdapter(networkSessionBridge, loggerService);
+			lifecycleService.RegisterAsync(runtimeSessionAdapter).Forget();
+
 			return networkSessionService;
 		}
 	}

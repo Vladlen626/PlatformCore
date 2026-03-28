@@ -6,5 +6,6 @@ namespace PlatformCore.Services.Network
 	{
 		NetworkSessionSnapshot Snapshot { get; }
 		event Action<NetworkSessionSnapshot> SessionStateChanged;
+		void UpdateSessionState(NetworkSessionSnapshot snapshot);
 	}
 }
