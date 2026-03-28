@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Implementation Plan
 
-Версия документа: 3.0  
-Статус: рабочая спецификация после фактического импорта foundation baseline  
+Версия документа: 3.1
+Статус: sync после sanity-pass по фактическому состоянию foundation baseline
 Назначение: использовать как основной план работ по доведению текущего репозитория `PlatformCore` до управляемого состояния PlatformCore 2.0
 
 ---
@@ -125,25 +125,28 @@ PlatformCore 2.0 — это слой над Unity для быстрой сбор
 - editor tooling;
 - sample/demo content.
 
-### 4.4 Lifecycle foundation требует не только переноса, но и исправления
+### 4.4 Lifecycle foundation уже стабилизирован
 
-Текущий `LifecycleService` уже является рабочей основой, но baseline содержит конкретные архитектурные проблемы:
+`LifecycleService` больше не находится в статусе «сырого импорта»:
 
-- нет ясной защиты от повторной регистрации;
-- поведение unregister/dispose нужно сделать идемпотентным;
-- одновременно используются `IActivatable` и `IDeactivatable`, что создаёт рассинхрон семантики;
-- регистрация update-типов через `switch` ломает сценарий, когда один контроллер реализует несколько lifecycle-интерфейсов одновременно;
-- group registration нужно зафиксировать как предсказуемую часть API, а не как побочный helper.
+- есть защита от повторной регистрации одного и того же controller instance;
+- `Unregister` работает идемпотентно;
+- поддерживается регистрация контроллера с несколькими update-интерфейсами одновременно;
+- `Dispose` предсказуемо очищает внутренние списки и завершает контроллеры.
 
-### 4.5 Не все целевые foundation-модули реально оформлены как модули
+Оставшиеся задачи по lifecycle — только маленькие polish/cleanup, без нового redesign.
+
+### 4.5 Не все целевые foundation-модули одинаково зрелые по границам
 
 Хотя код уже импортирован, целевая структура 2.0 пока не достигнута:
 
-- `Settings` как цельный слой отсутствует;
-- `SceneManagement` как цельный слой отсутствует;
+- `Settings` foundation уже добавлен как отдельный platform-level шаг;
+- `SceneManagement` foundation уже добавлен как отдельный platform-level шаг;
 - `Localization` сознательно выведен за границы PlatformCore;
-- `UI` находится скорее в состоянии частичного legacy import, чем законченного platform module;
-- `Audio` и `Camera` пока скорее imported services внутри legacy-сборки, чем завершённые независимые модули.
+- `UI` прошёл нормализацию до рабочего platform-level baseline;
+- `Audio` и `Camera` прошли нормализацию на уровне foundation API;
+- global in-app notifications сохранены как platform-level слой без localization dependency;
+- минимальный async-awaiter foundation присутствует в PlatformCore и используется как базовый async utility слой.
 
 ---
 
@@ -489,9 +492,9 @@ Reusable gameplay blocks только после стабилизации founda
 
 ---
 
-## 10. Новая дорожная карта
+## 10. Дорожная карта (обновлённый статус)
 
-### Этап 0. Repository Baseline Audit
+### Этап 0. Repository Baseline Audit — выполнен
 
 Сначала нужно провести ревизию уже существующего `PlatformCore`.
 
@@ -507,7 +510,7 @@ Reusable gameplay blocks только после стабилизации founda
 Отдельный markdown-документ:
 `docs/PlatformCore_2_0_Repo_Baseline_Audit.md`
 
-### Этап 1. Foundation Stabilization
+### Этап 1. Foundation Stabilization — выполнен
 
 Исправить критические дефекты уже импортированной базы.
 
@@ -518,7 +521,7 @@ Reusable gameplay blocks только после стабилизации founda
 - минимальная стабилизация bootstrap/runtime foundation;
 - фиксация composition rules.
 
-### Этап 2. Assembly and Dependency Split
+### Этап 2. Assembly and Dependency Split — выполнен (Core / Infrastructure / Editor)
 
 Разрезать текущий монолитный runtime assembly.
 
@@ -529,7 +532,7 @@ Reusable gameplay blocks только после стабилизации founda
 - `PlatformCore.Editor`;
 - подготовительные заготовки для `UI`, `Audio`, `Settings`, `SceneManagement`, `Camera`.
 
-### Этап 3. Sample and Legacy Payload Cleanup
+### Этап 3. Sample and Legacy Payload Cleanup — выполнен
 
 Очистить foundation от лишнего контента.
 
@@ -539,7 +542,7 @@ Reusable gameplay blocks только после стабилизации founda
 - ревизия editor-only кода;
 - ревизия sample-пакета.
 
-### Этап 4. UI Foundation Normalization
+### Этап 4. UI Foundation Normalization — выполнен
 
 Не greenfield UI, а нормализация уже импортированного UI baseline.
 
@@ -550,7 +553,7 @@ Reusable gameplay blocks только после стабилизации founda
 - layers/cursor/helpers;
 - отделение editor tooling от runtime UI.
 
-### Этап 5. Settings Foundation
+### Этап 5. Settings Foundation — выполнен
 
 Создать целостный settings module поверх уже стабилизированных foundation services.
 
@@ -562,7 +565,7 @@ Reusable gameplay blocks только после стабилизации founda
 - notifications;
 - appliers.
 
-### Этап 6. SceneManagement Foundation
+### Этап 6. SceneManagement Foundation — выполнен
 
 Вынести и оформить scene flow как отдельный platform module.
 
@@ -573,7 +576,7 @@ Reusable gameplay blocks только после стабилизации founda
 - persistent/gameplay scene split;
 - единая точка переходов.
 
-### Этап 7. Audio Foundation Rewrite/Normalization
+### Этап 7. Audio Foundation Rewrite/Normalization — выполнен
 
 Не переписать аудио с нуля, а довести импортированный `AudioBaseService` до platform-level состояния.
 
@@ -583,7 +586,7 @@ Reusable gameplay blocks только после стабилизации founda
 - settings integration;
 - cleanup service contract.
 
-### Этап 8. Camera Foundation Rewrite/Normalization
+### Этап 8. Camera Foundation Rewrite/Normalization — выполнен
 
 Не переписать камеру полностью, а довести импортированный camera baseline до reusable platform module.
 
@@ -594,14 +597,14 @@ Reusable gameplay blocks только после стабилизации founda
 - reusable camera mode policy;
 - удаление project-specific режимов.
 
-### Этап 9. Global Notifications Foundation
+### Этап 9. Global Notifications Foundation — выполнен
 
 После стабилизации foundation можно переносить следующие reusable слои:
 
 - global in-app notifications foundation;
 - runtime notifications API без зависимости на localization subsystem.
 
-### Этап 10. Reusable Gameplay Layer
+### Этап 10. Reusable Gameplay Layer — следующий крупный кандидат
 
 Только после стабилизации platform modules.
 
@@ -613,7 +616,7 @@ Reusable gameplay blocks только после стабилизации founda
 - `LevelComposite`;
 - `ShopComposite`.
 
-### Этап 11. FishNet Extension
+### Этап 11. FishNet Extension — по-прежнему отложен после gameplay/foundation decisions
 
 Только после устойчивого local foundation.
 
@@ -762,14 +765,18 @@ Codex должен:
 
 ## 16. Следующий практический шаг
 
-Следующий рабочий шаг после этого документа:
+После текущего sanity-pass foundation выглядит почти закрытым.
 
-1. положить обновлённый plan в сам репозиторий;
-2. сделать `Repo Baseline Audit` как отдельный markdown;
-3. первой инженерной пачкой взять `LifecycleService stabilization`;
-4. второй пачкой взять `asmdef split: Core / Infrastructure / Editor`;
-5. третьей пачкой сделать cleanup sample/assets payload;
-6. только потом переходить к settings и scene management.
+Ближайший decision point фиксируется так:
+
+1. **вариант A (предпочтительный):** переход к `Reusable Gameplay Layer`;
+2. **вариант B (если при ревизии composition root остались хвосты):** один маленький `Composite / Installer / composition sanity cleanup`, после чего сразу переход к reusable gameplay.
+
+Что важно:
+
+- не открывать новый subsystem в рамках этого шага;
+- не возвращать localization в границы PlatformCore;
+- не смешивать этот выбор с FishNet или gameplay-feature переносами.
 
 ---
 

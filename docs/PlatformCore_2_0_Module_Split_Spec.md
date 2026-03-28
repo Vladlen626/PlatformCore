@@ -1,12 +1,12 @@
 # PlatformCore 2.0 — Module Split Spec
 
-Версия документа: 1.0  
-Статус: рабочая спецификация на разрезание текущего legacy-монолита по модулям 2.0  
+Версия документа: 1.1
+Статус: спецификация + зафиксированный результат после Core / Infrastructure / Editor split
 Назначение: использовать как guide для asmdef split и наведения порядка в зависимостях
 
 ---
 
-## 1. Цель
+## 1. Цель и текущий статус
 
 Сейчас runtime-код находится в одном `PlatformCore.asmdef`.
 
@@ -21,6 +21,8 @@
 Цель этого документа:
 
 **разрезать текущий baseline на целевые модули 2.0 без big-bang rewrite.**
+
+Текущий статус: первичный split (`Core / Infrastructure / Editor`) выполнен. Документ дальше используется как reference для boundary-polish и для последующих модулей.
 
 ---
 
@@ -54,7 +56,7 @@
 
 ### 2.3 Infrastructure зависит на Core, но не наоборот
 
-`Infrastructure` может зависеть от `Core`.  
+`Infrastructure` может зависеть от `Core`.
 `Core` не должен зависеть от `Infrastructure`.
 
 ### 2.4 UI / Audio / Camera / Settings / SceneManagement должны быть отдельными слоями
@@ -276,23 +278,23 @@ PlatformCore.Samples
 
 ## 5. Практический порядок split
 
-### Шаг 1. Выделить Core
+### Шаг 1. Выделить Core — выполнен
 
 Сначала вынести минимальные контракты и базовые interfaces.
 
-### Шаг 2. Выделить Infrastructure
+### Шаг 2. Выделить Infrastructure — выполнен
 
 Перенести bootstrap и lifecycle foundation.
 
-### Шаг 3. Оставить Editor отдельным
+### Шаг 3. Оставить Editor отдельным — выполнен
 
 Проверить, что editor tooling не сидит в runtime tree без необходимости.
 
-### Шаг 4. Подготовить UI / Audio / Camera boundaries
+### Шаг 4. Подготовить UI / Audio / Camera boundaries — выполнен на уровне foundation normalization
 
 Пока можно не делать идеальный cleanup реализации, но физически отделить ownership слоёв.
 
-### Шаг 5. Отдельно оформить Settings и SceneManagement
+### Шаг 5. Отдельно оформить Settings и SceneManagement — выполнен
 
 Не раньше, чем Foundation split уже устойчив.
 
@@ -319,3 +321,5 @@ Module split считается успешным, если:
 - `Editor` физически отделён от runtime;
 - `Samples` не живут в foundation runtime tree как обязательная часть платформы;
 - следующий PR можно делать уже на уровне отдельного модуля, а не на уровне всего монолита.
+
+Текущий статус: **критерии выполнены для foundation-phase**.

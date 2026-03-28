@@ -1,12 +1,12 @@
 # PlatformCore 2.0 — Mini Spec for Milestone A
 
-Версия документа: 3.0  
-Статус: узкая спецификация первого этапа после фактического импорта foundation baseline  
+Версия документа: 3.1
+Статус: milestone A зафиксирован как закрытый, документ оставлен как reference
 Назначение: использовать как ТЗ на ближайший реальный milestone в текущем репозитории `PlatformCore`
 
 ---
 
-## 1. Цель Milestone A
+## 1. Цель Milestone A (выполнено)
 
 Milestone A теперь означает не foundation import с нуля.
 
@@ -20,11 +20,11 @@ Foundation baseline уже импортирован в репозиторий `P
 - подготовить foundation к модульному разделению;
 - не допустить преждевременного переписывания всей платформы с нуля.
 
-На выходе должен получиться **стабильный imported baseline**, готовый к следующему этапу модульного разделения и к переносу следующих platform-level подсистем.
+Результат достигнут: **стабильный imported baseline** сформирован, модульное разделение и ключевые foundation-нормализации выполнены.
 
 ---
 
-## 2. Что входит в Milestone A
+## 2. Что входило в Milestone A (выполнено)
 
 ### 2.1 Repo baseline audit
 
@@ -99,7 +99,7 @@ Foundation baseline уже импортирован в репозиторий `P
 
 ### 4.2 Fix before expand
 
-Сначала исправляем foundation, который уже есть.  
+Сначала исправляем foundation, который уже есть.
 Потом переносим новые слои.
 
 ### 4.3 Не смешивать стабилизацию и большой rewrite
@@ -132,7 +132,7 @@ Milestone A посвящён platform-level стабилизации, а не п
 
 ---
 
-## 6. Acceptance Criteria
+## 6. Acceptance Criteria (статус)
 
 Milestone A считается завершённым, если:
 
@@ -142,24 +142,28 @@ Milestone A считается завершённым, если:
 - sample/demo/editor payload отделён концептуально и частично физически от foundation;
 - следующие этапы больше не опираются на устаревший greenfield-сценарий.
 
+Текущий статус: **критерии выполнены**.
+
 ---
 
-## 7. Что делать сразу после Milestone A
+## 7. Что делать после закрытия Milestone A
 
-После Milestone A следующими этапами идут:
+После закрытия Milestone A текущий decision point:
 
-1. `Core / Infrastructure / Editor` asmdef split;
-2. `Settings` foundation;
-3. `SceneManagement` foundation;
-4. `UI` normalization;
-5. `Audio` normalization;
-6. `Camera` normalization.
+1. перейти к `Reusable Gameplay Layer`;
+2. или выполнить один маленький `Composite / Installer / composition sanity cleanup`, если по репозиторию ещё видны локальные хвосты.
 
 ---
 
 ## 8. Краткое резюме
 
-Milestone A теперь означает:
+Milestone A в истории проекта означает:
 
 - не «создать foundation»;
 - а «взять уже импортированный foundation baseline и привести его в устойчивое состояние».
+
+Дополнительные фиксации после закрытия:
+
+- localization остаётся вне PlatformCore;
+- global notifications остаются platform-level;
+- minimal async awaiter foundation уже присутствует в PlatformCore.

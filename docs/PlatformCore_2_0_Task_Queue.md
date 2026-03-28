@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Task Queue
 
-Версия документа: 1.0  
-Статус: рабочая очередь задач после baseline import  
+Версия документа: 1.1
+Статус: очередь после foundation sanity-pass (с закрытыми baseline-этапами)
 Назначение: использовать как короткий operational backlog для ближайших PR
 
 ---
@@ -19,242 +19,77 @@
 
 ---
 
-## Пачка 1. LifecycleService stabilization
+## Закрытые пачки foundation (исторически выполнены)
+
+- Пачка 1. `LifecycleService stabilization` — выполнено.
+- Пачка 2. `Core / Infrastructure / Editor split` — выполнено.
+- Пачка 3. `Baseline payload cleanup` — выполнено.
+- Пачка 4. `Resource / Factory audit and cleanup` — выполнено.
+- Пачка 5. `Settings foundation` — выполнено.
+- Пачка 6. `SceneManagement foundation` — выполнено.
+- Пачка 7. `UI normalization` — выполнено.
+- Пачка 8. `Audio normalization` — выполнено.
+- Пачка 9. `Camera normalization` — выполнено.
+- Пачка 10. `Global Notifications (без Localization)` — выполнено.
+
+> Важно: localization остаётся вне PlatformCore, notifications остаются platform-level, а minimal async awaiter foundation уже присутствует в текущем baseline.
+
+---
+
+## Следующая активная пачка (decision point)
+
+### Пачка A. Reusable Gameplay Layer (кандидат №1)
 
 ### Цель
 
-Сделать lifecycle foundation безопасным и предсказуемым.
+Начать следующий крупный этап после почти закрытого foundation.
 
 ### Что сделать
 
-- добавить защиту от duplicate registration;
-- сделать `Unregister` идемпотентным;
-- исправить регистрацию controller, который реализует несколько update-интерфейсов;
-- зафиксировать семантику `Activate` / `Deactivate` / `Dispose`;
-- перепроверить group registration APIs;
-- добавить минимальные runtime guards и комментарии по expected behavior.
+- выбрать 1–2 первых reusable gameplay-composites с понятным platform value;
+- опираться на уже нормализованный foundation без возврата к platform rewrite;
+- зафиксировать границы gameplay vs foundation на уровне installers/composition root.
 
 ### Что не трогать
 
-- asmdef split;
-- UI rewrite;
-- audio/camera;
-- settings;
-- scene management.
+- network/FishNet;
+- новый framework;
+- большой rename-driven cleanup foundation;
+- возврат localization в PlatformCore.
 
 ### Acceptance criteria
 
-- один controller не регистрируется дважды;
-- multi-interface controller обновляется во всех нужных фазах;
-- повторный unregister безопасен;
-- dispose не ломает внутренние списки lifecycle.
+- foundation не получает новых subsystem changes;
+- gameplay layer стартует как отдельный, читаемый трек.
 
 ---
 
-## Пачка 2. Core / Infrastructure / Editor split
+## Альтернативная маленькая пачка перед gameplay (опционально)
+
+### Пачка B. Composition sanity cleanup (только если реально нужен)
 
 ### Цель
 
-Разрезать foundation на первые реальные модули.
+Сделать короткий polish `Composite / Installer / composition root`, если найдены остаточные хвосты после foundation cleanup.
 
 ### Что сделать
 
-- выделить `PlatformCore.Core`;
-- выделить `PlatformCore.Infrastructure`;
-- оставить `PlatformCore.Editor` отдельной assembly;
-- убрать тяжёлые vendor/runtime references из Core;
-- привести namespace ownership к новой модульной карте.
+- убрать только очевидные stale comments/notes/ownership хвосты;
+- синхронизировать composition registration flow без расширения архитектуры;
+- оставить поведение совместимым с текущим foundation.
 
 ### Что не трогать
 
-- settings foundation;
-- scene management foundation;
-- полный UI/audio/camera cleanup.
+- gameplay features;
+- новый composition framework;
+- network/FishNet;
+- новый subsystem или большой refactor.
 
 ### Acceptance criteria
 
-- `Core` собирается без FMOD/Cinemachine/TMP dependencies;
-- `Infrastructure` зависит от `Core`, но не наоборот;
-- `Editor` не смешан с runtime.
-
----
-
-## Пачка 3. Baseline payload cleanup
-
-### Цель
-
-Убрать лишний sample/demo/project-specific payload из foundation дерева.
-
-### Что сделать
-
-- пересмотреть placeholder materials и textures;
-- определить, что остаётся sample content, а что удаляется;
-- проверить generated assets и generated source files;
-- убрать случайный project payload из foundation слоёв.
-
-### Что не трогать
-
-- lifecycle logic;
-- settings implementation;
-- network;
-- gameplay systems.
-
-### Acceptance criteria
-
-- foundation tree не содержит случайный demo payload как обязательную часть runtime;
-- sample assets вынесены или явно помечены как sample/demo.
-
----
-
-## Пачка 4. Resource / Factory audit and cleanup
-
-### Цель
-
-Отделить reusable resource/factory layer от project-specific структуры D6.
-
-### Что сделать
-
-- перепроверить `ObjectFactory`;
-- перепроверить `ResourceService`;
-- перепроверить `ResourcePaths`;
-- отделить platform-level entries от project/game-specific entries;
-- определить, нужен ли split на runtime foundation paths и sample/game paths.
-
-### Что не трогать
-
-- полный scene management;
-- gameplay resource graphs;
-- analytics.
-
-### Acceptance criteria
-
-- `ResourcePaths` больше не выглядит как карта ресурсов конкретной игры;
-- `ObjectFactory` и `ResourceService` имеют понятную platform responsibility.
-
----
-
-## Пачка 5. Settings foundation
-
-### Цель
-
-Добавить нормальный platform-level слой настроек.
-
-### Что сделать
-
-- `SettingsService`;
-- data model;
-- persistence;
-- notifications;
-- appliers.
-
-### Что не трогать
-
-- settings menu;
-- gameplay options;
-- full audio rewrite;
-- full camera rewrite.
-
-### Acceptance criteria
-
-- настройки сохраняются и читаются через единый platform service;
-- audio/camera могут интегрироваться через settings layer.
-
----
-
-## Пачка 6. SceneManagement foundation
-
-### Цель
-
-Оформить scene loading и transitions как отдельный platform module.
-
-### Что сделать
-
-- scene loader;
-- loading flow;
-- persistent/gameplay scene split;
-- orchestration point для переходов.
-
-### Что не трогать
-
-- game-specific scene names;
-- quest/mission flows;
-- network scene logic.
-
-### Acceptance criteria
-
-- есть единый scene management слой;
-- scene orchestration не размазана по bootstrap и runtime services.
-
----
-
-## Пачка 7. UI normalization
-
-### Цель
-
-Нормализовать уже импортированный UI baseline.
-
-### Что сделать
-
-- перепроверить `BaseContextController<T>`;
-- оформить runtime UI base;
-- ввести минимальные layers/cursor/helpers;
-- отделить runtime UI от editor style tooling.
-
-### Что не трогать
-
-- gameplay UI;
-- pause menu;
-- HUD;
-- inventory;
-- settings menu.
-
-### Acceptance criteria
-
-- есть platform-level UI foundation;
-- нет смешения с gameplay UI.
-
----
-
-## Пачка 8. Audio normalization
-
-### Цель
-
-Довести imported audio baseline до platform-level качества.
-
-### Что сделать
-
-- определить границу between platform API and FMOD implementation;
-- связать с settings;
-- убрать лишнюю project-specific политику из сервиса.
-
----
-
-## Пачка 9. Camera normalization
-
-### Цель
-
-Довести imported camera baseline до reusable platform module.
-
-### Что сделать
-
-- убрать игровые camera states из foundation contract;
-- выровнять API;
-- связать с settings;
-- сохранить shake/basic camera functionality.
-
----
-
-## Пачка 10. Global Notifications (без Localization)
-
-### Цель
-
-После stabilization foundation перенести следующие reusable UI-related слои.
-
-### Что сделать
-
-- global in-app notifications;
-- чистый notifications API без зависимости на localization contracts/services.
-- без переноса D6 prefab pack как обязательной части foundation.
+- cleanup маленький и локальный;
+- улучшена читаемость/предсказуемость composition entry points;
+- следующий шаг к reusable gameplay остаётся прямым.
 
 ---
 
