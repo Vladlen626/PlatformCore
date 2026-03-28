@@ -32,10 +32,7 @@ namespace PlatformCore.Services.Settings.Appliers
 
 		private void Apply(AudioSettingsData data)
 		{
-			_audioService.SetMasterVolume(data.MasterVolume);
-			_audioService.SetMusicVolume(data.MusicVolume);
-			_audioService.SetSfxVolume(data.SfxVolume);
-			_audioService.SetMuted(data.IsMuted);
+			_audioService.ApplyVolumeSettings(data.MasterVolume, data.MusicVolume, data.SfxVolume, data.IsMuted);
 		}
 	}
 }

@@ -18,11 +18,12 @@ namespace PlatformCore.Services.Audio
 		void SetMasterVolume(float volume);
 		void SetSfxVolume(float volume);
 		void SetMuted(bool muted);
+		void ApplyVolumeSettings(float masterVolume, float musicVolume, float sfxVolume, bool muted);
 
 		bool IsMuted { get; }
 
 		float MasterVolume { get; }
-		public float MusicVolume { get; }
-		public float SfxVolume { get; }
+		float MusicVolume { get; }
+		float SfxVolume { get; }
 	}
 }
