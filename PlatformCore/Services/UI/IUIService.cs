@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 
 namespace PlatformCore.Services.UI
 {
@@ -7,6 +6,7 @@ namespace PlatformCore.Services.UI
 	{
 		T GetWindow<T>() where T : UIBaseElement;
 		bool IsShowed<T>() where T : UIBaseElement;
+		void Hide<T>() where T : UIBaseElement;
 
 		void Unload<T>() where T : UIBaseElement;
 
