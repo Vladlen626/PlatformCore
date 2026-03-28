@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PlatformCore.Services.UI
 {
-	public class UIRuntimeContext : MonoBehaviour
+	public class UIRuntimeContext : MonoBehaviour, IUIRuntimeContext
 	{
 		[SerializeField] private UICanvasEntry[] _canvasEntries;
 

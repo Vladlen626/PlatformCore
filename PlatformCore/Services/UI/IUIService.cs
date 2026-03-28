@@ -4,6 +4,7 @@ namespace PlatformCore.Services.UI
 {
 	public interface IUIService
 	{
+		T Show<T>() where T : UIBaseElement;
 		T GetWindow<T>() where T : UIBaseElement;
 		bool IsShowed<T>() where T : UIBaseElement;
 		void Hide<T>() where T : UIBaseElement;

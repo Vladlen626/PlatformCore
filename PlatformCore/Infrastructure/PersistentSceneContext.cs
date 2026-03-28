@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using PlatformCore.Services;
 using PlatformCore.Services.UI;
 using UnityEngine;
@@ -10,7 +12,18 @@ namespace PlatformCore.Infrastructure
 		[SerializeField] private UIRuntimeContext _uiRuntimeContext;
 
 		public Scene Scene { get; private set; }
-		public UIRuntimeContext UIRuntimeContext => _uiRuntimeContext;
+		public IReadOnlyList<UICanvasEntry> UICanvasEntries
+		{
+			get
+			{
+				if (!_uiRuntimeContext)
+				{
+					return Array.Empty<UICanvasEntry>();
+				}
+
+				return _uiRuntimeContext.CanvasEntries;
+			}
+		}
 
 		private void Awake()
 		{
