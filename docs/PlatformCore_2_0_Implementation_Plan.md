@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Implementation Plan
 
-Версия документа: 3.1
-Статус: sync после sanity-pass по фактическому состоянию foundation baseline
+Версия документа: 3.2
+Статус: финальный docs sync после закрытия foundation-phase и запуска узкого gameplay/network runtime слоя
 Назначение: использовать как основной план работ по доведению текущего репозитория `PlatformCore` до управляемого состояния PlatformCore 2.0
 
 ---
@@ -47,7 +47,7 @@ PlatformCore 2.0 — это слой над Unity для быстрой сбор
 ### Не-цели текущей фазы
 
 - не переписывать всё ради «красивой новой архитектуры»;
-- не начинать FishNet раньше стабилизации локальной платформы;
+- не разворачивать FishNet в полный gameplay networking framework на уровне PlatformCore;
 - не тащить в foundation gameplay-specific код;
 - не оставлять imported code в виде бесконтрольного legacy-монолита;
 - не смешивать перенос нового слоя и глубокую переработку всей старой базы в одном шаге.
@@ -68,7 +68,7 @@ PlatformCore 2.0 — это слой над Unity для быстрой сбор
 - `PersistentSceneContext`;
 - `LifecycleService` и lifecycle interfaces;
 - `BaseContextController` и базовая UI-related инфраструктура;
-- `ConfigLoader` и config foundation;
+- `ConfigService` и config foundation;
 - `ConfigService`;
 - `ObjectFactory`, `ResourceService`, `ResourcePaths`;
 - `AudioBaseService` и `IAudioService`;
@@ -194,7 +194,7 @@ PlatformCore 2.0 — это слой над Unity для быстрой сбор
 - декларация состава: `Installer`;
 - UI-специализированный контроллер: `BaseContextController<T>`;
 - lifecycle строится вокруг `LifecycleService`;
-- сеть позже живёт отдельным узким extension-модулем под FishNet.
+- сеть живёт отдельным узким extension-модулем под FishNet foundation/session layer.
 
 ### 6.2 Общий стиль архитектуры
 
@@ -212,10 +212,12 @@ PlatformCore 2.0 по-прежнему делится на:
    - camera foundation.
 
 2. **Reusable Gameplay**
-   - только после стабилизации foundation.
+   - старт уже выполнен (SettingsComposite, PauseMenuComposite, first-person/third-person camera gameplay layer);
+   - scope ограничен reusable runtime blocks без превращения PlatformCore в полный game framework.
 
 3. **Network Extension**
-   - только после стабилизации local platform layer.
+   - старт уже выполнен как узкий FishNet foundation/session runtime entry layer;
+   - без platform-level multiplayer gameplay framework.
 
 ### 6.3 Новый приоритет
 
@@ -362,12 +364,15 @@ Bootstrap, application lifetime и controller lifecycle.
 
 **Что уже есть**
 
-- целостного settings module ещё нет.
+- `SettingsService`;
+- `ISettingsPersistence` + `PlayerPrefsSettingsPersistence`;
+- `AudioSettingsApplier` и `CameraSettingsApplier`;
+- `ServiceLocatorSettingsExtensions.RegisterSettingsFoundation(...)`.
 
 **Что нужно сделать**
 
-- создать settings foundation уже поверх стабилизированного baseline;
-- не лепить settings напрямую в audio/camera/ui.
+- держать границы settings как platform-level foundation;
+- не переносить game-specific настройки в PlatformCore.
 
 ### 8.6 PlatformCore.SceneManagement
 
@@ -378,12 +383,13 @@ Scene loading, persistent scene flow и transition orchestration.
 **Что уже есть**
 
 - `PersistentSceneContext`;
-- foundation-намёк в bootstrap layer.
+- `ISceneService` / `SceneService`;
+- `ServiceLocatorSceneExtensions.RegisterSceneManagementFoundation(...)`.
 
 **Что нужно сделать**
 
-- оформить единый scene management layer;
-- убрать размазанную загрузочную логику из других мест.
+- сохранять scene management как foundation-слой;
+- не смешивать его с game-specific orchestration.
 
 ### 8.7 PlatformCore.Camera
 
@@ -409,11 +415,13 @@ Reusable camera foundation.
 
 **Цель модуля**
 
-Reusable gameplay blocks только после стабилизации foundation.
+Reusable gameplay blocks поверх стабилизированного foundation baseline.
 
 **Текущий статус**
 
-- в baseline не должен тащиться до завершения foundation cleanup.
+- трек уже запущен: `SettingsComposite`, `PauseMenuComposite`, first-person/third-person camera gameplay layer;
+- `PlayerComposite`, `ShopComposite`, `LevelComposite` не являются обязательной частью текущего PlatformCore scope;
+- reusable character controller сознательно не входит в текущий platform scope.
 
 ### 8.9 PlatformCore.Network.FishNet
 
@@ -423,17 +431,17 @@ Reusable gameplay blocks только после стабилизации founda
 
 **Текущий статус**
 
-- foundation stabilization завершён; начат первый минимальный FishNet extension step.
+- foundation stabilization завершён; есть runtime-ready минимальный FishNet foundation/session entry layer.
 
 ---
 
-## 9. Обязательная программа исправления imported baseline
+## 9. Обязательная программа исправления imported baseline (исторически закрыта)
 
-Этот раздел считается главным practical backlog ближайшего этапа.
+Этот раздел сохранён как reference по уже выполненным базовым шагам стабилизации.
 
 ### 9.1 LifecycleService stabilization
 
-Обязательно сделать:
+Сделано:
 
 - защиту от повторной регистрации одного и того же controller instance;
 - идемпотентный `Unregister`;
@@ -444,7 +452,7 @@ Reusable gameplay blocks только после стабилизации founda
 
 ### 9.2 Asmdef split
 
-Обязательно сделать:
+Сделано:
 
 - выделить `PlatformCore.Core`;
 - выделить `PlatformCore.Infrastructure`;
@@ -454,7 +462,7 @@ Reusable gameplay blocks только после стабилизации founda
 
 ### 9.3 Asset and sample cleanup
 
-Обязательно сделать:
+Сделано:
 
 - вынести placeholder materials и texture-наборы в `Samples` или отдельный demo-layer;
 - убрать случайный asset payload из foundation-слоёв;
@@ -476,7 +484,7 @@ Reusable gameplay blocks только после стабилизации founda
 
 ### 9.5 Audio and Camera normalization
 
-Обязательно сделать:
+Сделано:
 
 - убрать project-specific состояния камер;
 - отделить foundation API от конкретных игровых сценариев;
@@ -484,7 +492,7 @@ Reusable gameplay blocks только после стабилизации founda
 
 ### 9.6 Repo documentation baseline
 
-Обязательно сделать:
+Сделано:
 
 - положить актуальные docs в сам репозиторий;
 - зафиксировать новую стратегию не как greenfield, а как imported-baseline cleanup;
@@ -604,17 +612,20 @@ Reusable gameplay blocks только после стабилизации founda
 - global in-app notifications foundation;
 - runtime notifications API без зависимости на localization subsystem.
 
-### Этап 10. Reusable Gameplay Layer — следующий крупный кандидат
+### Этап 10. Reusable Gameplay Layer — старт выполнен, продолжается как узкий трек
 
-Только после стабилизации platform modules.
+После стабилизации platform modules запущены первые reusable блоки:
 
-Примеры:
+- `SettingsComposite`;
+- `PauseMenuComposite`;
+- first-person/third-person camera gameplay layer.
+
+Не является обязательной частью текущего scope:
 
 - `PlayerComposite`;
-- `PauseMenuComposite`;
-- `SettingsComposite`;
 - `LevelComposite`;
-- `ShopComposite`.
+- `ShopComposite`;
+- reusable character controller.
 
 ### Этап 11. FishNet Extension — первый минимальный foundation step запущен
 

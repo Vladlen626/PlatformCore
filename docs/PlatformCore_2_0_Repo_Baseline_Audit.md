@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Repo Baseline Audit
 
-Версия документа: 1.1
-Статус: аудит синхронизирован с состоянием после серии cleanup/stabilization PR
+Версия документа: 1.2
+Статус: аудит синхронизирован с финальным docs pass (foundation закрыт, gameplay/network narrow tracks стартованы)
 Назначение: использовать как карту текущего baseline перед stabilization, modular split и selective rewrite
 
 ---
@@ -25,6 +25,18 @@
 ---
 
 ## 2. Краткий вывод по состоянию репозитория
+
+### 2.1 Актуальная фиксация на текущий момент
+
+Дополнительно подтверждено по коду:
+
+- foundation-phase по сокращённому плану практически завершён;
+- reusable gameplay layer реально начат (`SettingsComposite`, `PauseMenuComposite`, camera gameplay layer first/third person);
+- FishNet foundation/session runtime layer уже есть и подключается через service locator extensions;
+- localization не входит в PlatformCore scope;
+- global notifications входят в PlatformCore scope;
+- reusable character controller, `PlayerComposite`, `ShopComposite`, `LevelComposite` не входят в обязательный scope текущего baseline.
+
 
 Текущее состояние `PlatformCore` можно описать так:
 
@@ -74,7 +86,6 @@
 
 Уже присутствуют:
 
-- `ConfigLoader`
 - `ConfigService`
 - `BaseConfig`
 - `ObjectFactory`
