@@ -102,3 +102,26 @@
 - gameplay composites;
 - gameplay UI;
 - vendor-specific extensions beyond what already imported.
+
+---
+
+## Network track — первый минимальный стартовый шаг
+
+### Пачка C. FishNet foundation / extension bootstrap (минимальный)
+
+### Цель
+
+Открыть network track самым узким platform-level шагом без ввода gameplay networking framework.
+
+### Что сделано в минимальном шаге
+
+- добавлен узкий `INetworkSessionService` + `INetworkSessionBridge` контракт для состояния сессии;
+- добавлен `FishNetSessionBridge` как минимальный bridge-слой;
+- добавлен `ServiceLocatorFishNetExtensions.RegisterFishNetFoundation(...)` для стандартной registration/wiring интеграции с текущим foundation и lifecycle.
+
+### Что принципиально не входит в scope
+
+- reusable networked character controller;
+- player spawning framework;
+- game-specific multiplayer logic;
+- большой wrapper поверх FishNet API.

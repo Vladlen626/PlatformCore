@@ -423,7 +423,7 @@ Reusable gameplay blocks только после стабилизации founda
 
 **Текущий статус**
 
-- отложено до конца локальной стабилизации.
+- foundation stabilization завершён; начат первый минимальный FishNet extension step.
 
 ---
 
@@ -616,9 +616,15 @@ Reusable gameplay blocks только после стабилизации founda
 - `LevelComposite`;
 - `ShopComposite`.
 
-### Этап 11. FishNet Extension — по-прежнему отложен после gameplay/foundation decisions
+### Этап 11. FishNet Extension — первый минимальный foundation step запущен
 
-Только после устойчивого local foundation.
+После стабилизации local foundation в PlatformCore добавлен узкий стартовый network entry-point слой:
+
+- `INetworkSessionService` как platform-level session state surface;
+- `INetworkSessionBridge` + `FishNetSessionBridge` как минимальный integration bridge;
+- `ServiceLocatorFishNetExtensions.RegisterFishNetFoundation(...)` как стандартная registration/wiring точка входа.
+
+Следующие шаги по network track выполняются только поверх этого слоя, без перехода к крупному multiplayer framework.
 
 ---
 
