@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Module Split Spec
 
-Версия документа: 1.1
-Статус: спецификация + зафиксированный результат после Core / Infrastructure / Editor split
+Версия документа: 1.2
+Статус: спецификация + sync с фактическим состоянием split (Core / Infrastructure / Editor сделаны, остальные слои пока логические)
 Назначение: использовать как guide для asmdef split и наведения порядка в зависимостях
 
 ---
@@ -22,7 +22,7 @@
 
 **разрезать текущий baseline на целевые модули 2.0 без big-bang rewrite.**
 
-Текущий статус: первичный split (`Core / Infrastructure / Editor`) выполнен. Документ дальше используется как reference для boundary-polish и для последующих модулей.
+Текущий статус: первичный split (`Core / Infrastructure / Editor`) выполнен. Отдельные asmdef для `UI/Audio/Settings/SceneManagement/Camera` пока не выделены физически и остаются логическими слоями внутри текущего runtime baseline. Документ используется как reference для boundary-polish без redesign.
 
 ---
 

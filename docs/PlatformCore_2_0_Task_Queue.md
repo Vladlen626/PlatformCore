@@ -1,25 +1,23 @@
 # PlatformCore 2.0 — Task Queue
 
-Версия документа: 1.1
-Статус: очередь после foundation sanity-pass (с закрытыми baseline-этапами)
-Назначение: использовать как короткий operational backlog для ближайших PR
+Версия документа: 1.2
+Статус: финальный docs sync после закрытия foundation-phase и запуска gameplay/network foundation tracks
+Назначение: короткий operational backlog без расширения scope платформы
 
 ---
 
 ## Общий принцип
 
-Сейчас `PlatformCore` уже содержит imported baseline.
+Сейчас `PlatformCore` находится в состоянии **platform baseline ready**:
 
-Поэтому ближайшие задачи должны:
-
-- стабилизировать уже имеющийся foundation;
-- уменьшать legacy-долг;
-- улучшать границы модулей;
-- не расширять платформу раньше времени.
+- foundation-этап по сокращённому плану практически завершён;
+- reusable gameplay layer уже начат;
+- FishNet foundation/session runtime entry layer уже есть;
+- следующий шаг — не новый subsystem, а поддержание чистых границ platform vs game.
 
 ---
 
-## Закрытые пачки foundation (исторически выполнены)
+## Закрытые и зафиксированные foundation-пачки
 
 - Пачка 1. `LifecycleService stabilization` — выполнено.
 - Пачка 2. `Core / Infrastructure / Editor split` — выполнено.
@@ -31,97 +29,59 @@
 - Пачка 8. `Audio normalization` — выполнено.
 - Пачка 9. `Camera normalization` — выполнено.
 - Пачка 10. `Global Notifications (без Localization)` — выполнено.
+- Пачка 11. `Minimal AsyncAwaiter foundation` — выполнено.
+- Пачка 12. `Composition foundation` — выполнено.
 
-> Важно: localization остаётся вне PlatformCore, notifications остаются platform-level, а minimal async awaiter foundation уже присутствует в текущем baseline.
-
----
-
-## Следующая активная пачка (decision point)
-
-### Пачка A. Reusable Gameplay Layer (кандидат №1)
-
-### Цель
-
-Начать следующий крупный этап после почти закрытого foundation.
-
-### Что сделать
-
-- выбрать 1–2 первых reusable gameplay-composites с понятным platform value;
-- опираться на уже нормализованный foundation без возврата к platform rewrite;
-- зафиксировать границы gameplay vs foundation на уровне installers/composition root.
-
-### Что не трогать
-
-- network/FishNet;
-- новый framework;
-- большой rename-driven cleanup foundation;
-- возврат localization в PlatformCore.
-
-### Acceptance criteria
-
-- foundation не получает новых subsystem changes;
-- gameplay layer стартует как отдельный, читаемый трек.
+> Важно: localization остаётся вне PlatformCore; notifications остаются platform-level; platform не включает готовый reusable character controller.
 
 ---
 
-## Альтернативная маленькая пачка перед gameplay (опционально)
+## Reusable gameplay layer — текущий статус
 
-### Пачка B. Composition sanity cleanup (только если реально нужен)
+Трек уже начат в runtime:
 
-### Цель
+- `SettingsComposite` — есть;
+- `PauseMenuComposite` — есть;
+- reusable camera gameplay layer для first-person / third-person — есть.
 
-Сделать короткий polish `Composite / Installer / composition root`, если найдены остаточные хвосты после foundation cleanup.
+### Границы трека
 
-### Что сделать
-
-- убрать только очевидные stale comments/notes/ownership хвосты;
-- синхронизировать composition registration flow без расширения архитектуры;
-- оставить поведение совместимым с текущим foundation.
-
-### Что не трогать
-
-- gameplay features;
-- новый composition framework;
-- network/FishNet;
-- новый subsystem или большой refactor.
-
-### Acceptance criteria
-
-- cleanup маленький и локальный;
-- улучшена читаемость/предсказуемость composition entry points;
-- следующий шаг к reusable gameplay остаётся прямым.
+- это **не** переход к "полноценному game framework";
+- `PlayerComposite`, `ShopComposite`, `LevelComposite` не являются обязательной частью текущего PlatformCore scope;
+- `Composite` не является default-решением для любой фичи.
 
 ---
 
-## Пока не брать
+## Network track — текущий статус
 
-Не брать в ближайшие пачки:
+FishNet foundation track уже доведён до узкого runtime-ready состояния:
 
-- analytics;
-- FishNet;
-- gameplay composites;
-- gameplay UI;
-- vendor-specific extensions beyond what already imported.
-
----
-
-## Network track — первый минимальный стартовый шаг
-
-### Пачка C. FishNet foundation / extension bootstrap (минимальный)
-
-### Цель
-
-Открыть network track самым узким platform-level шагом без ввода gameplay networking framework.
-
-### Что сделано в минимальном шаге
-
-- добавлен узкий `INetworkSessionService` + `INetworkSessionBridge` контракт для состояния сессии;
-- добавлен `FishNetSessionBridge` как минимальный bridge-слой;
-- добавлен `ServiceLocatorFishNetExtensions.RegisterFishNetFoundation(...)` для стандартной registration/wiring интеграции с текущим foundation и lifecycle.
+- session foundation (`INetworkSessionService`, `INetworkSessionBridge`, `FishNetSessionBridge`) — есть;
+- registration entry points (`ServiceLocatorFishNetExtensions.RegisterFishNetFoundation(...)`) — есть;
+- runtime callback adapter (`FishNetRuntimeSessionAdapter`) — есть;
+- role cleanup в network layer (service/controller split) — есть.
 
 ### Что принципиально не входит в scope
 
 - reusable networked character controller;
 - player spawning framework;
-- game-specific multiplayer logic;
-- большой wrapper поверх FishNet API.
+- full multiplayer gameplay framework;
+- game-specific multiplayer orchestration.
+
+---
+
+## Ближайший backlog (без нового subsystem)
+
+1. Финальный docs sync по фактическому repo state.
+2. Практическая usage-документация для запуска новой игры на текущем baseline.
+3. Небольшой boundary-polish только при явной необходимости (без redesign).
+
+---
+
+## Пока не брать
+
+- localization subsystem внутрь PlatformCore;
+- analytics subsystem;
+- shop/level/dialogue frameworks;
+- gameplay-specific character controller в platform scope;
+- новый общий framework поверх текущего baseline.
