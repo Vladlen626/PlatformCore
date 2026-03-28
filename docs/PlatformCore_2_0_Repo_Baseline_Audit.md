@@ -1,7 +1,7 @@
 # PlatformCore 2.0 — Repo Baseline Audit
 
-Версия документа: 1.0  
-Статус: аудит текущего состояния репозитория `PlatformCore` после первого большого legacy import  
+Версия документа: 1.1
+Статус: аудит синхронизирован с состоянием после серии cleanup/stabilization PR
 Назначение: использовать как карту текущего baseline перед stabilization, modular split и selective rewrite
 
 ---
@@ -31,10 +31,11 @@
 - foundation baseline уже импортирован;
 - импорт сделан близко к legacy-оригиналу;
 - это лучше, чем greenfield rewrite, но база пока сырая;
-- runtime собран как монолит;
-- editor tooling и sample/demo payload ещё не отделены;
-- часть imported code уже platform-level;
-- часть imported code явно project-specific и требует выноса или разделения.
+- Core / Infrastructure / Editor split уже оформлен;
+- lifecycle, UI, audio, camera и resource/factory foundation прошли нормализацию;
+- settings и scene management foundation уже добавлены;
+- localization подтверждённо остаётся за границами PlatformCore;
+- global notifications и minimal async awaiter уже присутствуют как platform-level foundation.
 
 Главный practical вывод:
 
@@ -195,20 +196,17 @@
 
 ---
 
-## 5.2 LifecycleService содержит архитектурный долг
+## 5.2 LifecycleService: критический долг закрыт
 
-`LifecycleService` уже можно использовать как baseline, но текущая реализация не должна считаться финальной.
+`LifecycleService` больше не находится в критической зоне:
 
-Главные проблемы:
-
-- нет явной защиты от duplicate registration;
-- unregister/dispose семантика недостаточно зафиксирована;
-- одновременно используются `IActivatable` и `IDeactivatable`;
-- регистрация update-интерфейсов через `switch` не позволяет одному controller одновременно быть, например, и `IUpdatable`, и `ILateUpdatable`;
-- group registration API есть, но не зафиксирован как контракт platform-level поведения.
+- duplicate registration guard реализован;
+- `Unregister` работает идемпотентно;
+- multi-interface update registration поддерживается;
+- dispose/unregister semantics стабилизированы.
 
 ### Статус
-**keep as baseline + fix immediately**
+**keep as stabilized baseline**
 
 ---
 
@@ -296,7 +294,7 @@ Camera слой уже импортирован, но сейчас там вид
 
 ---
 
-## 5.7 Runtime, editor and sample payload пока смешаны
+## 5.7 Runtime, editor and sample payload: границы улучшены
 
 Сейчас в дереве репозитория рядом живут:
 
@@ -307,10 +305,19 @@ Camera слой уже импортирован, но сейчас там вид
 - generated content;
 - UI resource references.
 
-Такое состояние нормально как промежуточный legacy import, но не как зрелый PlatformCore.
+Это всё ещё зона для точечного polish, но критичный baseline cleanup уже выполнен.
 
 ### Статус
-**must split**
+**partially resolved, polish only**
+
+---
+
+## 5.8 Async Awaiter foundation уже добавлен
+
+В foundation присутствует минимальный async awaiter слой (D6-style по назначению), зарегистрируемый через platform-level service extensions.
+
+### Статус
+**keep as platform-level foundation**
 
 ---
 
@@ -341,15 +348,8 @@ Camera слой уже импортирован, но сейчас там вид
 
 Порядок ближайших шагов должен быть таким:
 
-1. `LifecycleService stabilization`
-2. `asmdef split: Core / Infrastructure / Editor`
-3. `ResourcePaths / Factory / ResourceService audit`
-4. `sample/demo asset cleanup`
-5. `Settings foundation`
-6. `SceneManagement foundation`
-7. `UI normalization`
-8. `Audio normalization`
-9. `Camera normalization`
+1. `Reusable Gameplay Layer` (основной следующий кандидат)
+2. `Composition sanity cleanup` (маленький опциональный шаг перед gameplay, если реально нужен)
 
 ---
 
@@ -362,7 +362,8 @@ Camera слой уже импортирован, но сейчас там вид
 - shop / inventory / HUD / pause menu;
 - analytics;
 - FishNet;
-- большой rename-driven rewrite всего репозитория.
+- большой rename-driven rewrite всего репозитория;
+- возврат localization в PlatformCore foundation.
 
 ---
 
