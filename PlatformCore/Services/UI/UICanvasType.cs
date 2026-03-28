@@ -4,15 +4,23 @@
 	{
 		Default = 0,
 
-		PlayerHud = 5,
+		Gameplay = 5,
 
-		Menu = 10,
-		MenuOverlap = 11,
+		Screen = 10,
+		ScreenOverlay = 11,
 
-		Popup = 20,
-		Overlay = 21,
-		Tooltip = 22,
+		Modal = 20,
+		ModalOverlay = 21,
+		Hint = 22,
 
-		AbsoluteTop = 100
+		Cursor = 90,
+		AbsoluteTop = 100,
+
+		PlayerHud = Gameplay,
+		Menu = Screen,
+		MenuOverlap = ScreenOverlay,
+		Popup = Modal,
+		Overlay = ModalOverlay,
+		Tooltip = Hint
 	}
 }

@@ -31,6 +31,11 @@ namespace PlatformCore.Services.UI
 		public UniTask PostInitializeAsync(CancellationToken ct)
 		{
 			_uiCursorView = _uiService.GetWindow<UICursorView>();
+			if (_uiCursorView)
+			{
+				_uiCursorView.Hide();
+			}
+
 			return UniTask.CompletedTask;
 		}
 

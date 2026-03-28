@@ -81,12 +81,25 @@ namespace PlatformCore.Services.UI
 			}
 
 			window.gameObject.SetActive(true);
+			window.Show();
 			return (T)window;
 		}
 
 		public bool IsShowed<T>() where T : UIBaseElement
 		{
 			return _windows.TryGetValue(typeof(T), out var window) && window && window.IsShown();
+		}
+
+		public void Hide<T>() where T : UIBaseElement
+		{
+			var type = typeof(T);
+			if (!_windows.TryGetValue(type, out var window) || !window)
+			{
+				return;
+			}
+
+			window.Hide();
+			window.gameObject.SetActive(false);
 		}
 
 		// === PRELOAD / UNLOAD ===

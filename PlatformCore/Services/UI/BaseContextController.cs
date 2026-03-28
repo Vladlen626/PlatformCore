@@ -1,9 +1,8 @@
 ﻿using Cysharp.Threading.Tasks;
 using PlatformCore.Core;
 using PlatformCore.Core.Lifecycle;
-using PlatformCore.Services.UI;
 
-namespace PlatformCore.Infrastructure
+namespace PlatformCore.Services.UI
 {
 	public class BaseContextController<T> : IBaseController, IActivatable, IPreloadable where T : UIBaseElement
 	{
@@ -30,10 +29,19 @@ namespace PlatformCore.Infrastructure
 		public void Deactivate()
 		{
 			OnDeactivate();
-			_uiService.Unload<T>();
+			if (ShouldUnloadOnDeactivate)
+			{
+				_uiService.Unload<T>();
+			}
+			else
+			{
+				_uiService.Hide<T>();
+			}
+
 			_context = null;
 		}
 		
+		protected virtual bool ShouldUnloadOnDeactivate => true;
 		protected virtual void OnActivate(){}
 		protected virtual void OnDeactivate(){}
 

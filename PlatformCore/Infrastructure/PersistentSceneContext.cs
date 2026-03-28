@@ -7,10 +7,10 @@ namespace PlatformCore.Infrastructure
 {
 	public class PersistentSceneContext : MonoBehaviour, ISceneContext
 	{
-		[SerializeField] private UICanvasEntry[] _uiCanvases;
+		[SerializeField] private UIRuntimeContext _uiRuntimeContext;
 
 		public Scene Scene { get; private set; }
-		public UICanvasEntry[] UICanvases => _uiCanvases;
+		public UIRuntimeContext UIRuntimeContext => _uiRuntimeContext;
 
 		private void Awake()
 		{
