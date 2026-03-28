@@ -1,24 +1,19 @@
-# PlatformCore 2.0 — Batch 10: Localization + Global Notifications foundation
+# PlatformCore 2.0 — Batch 10: Global Notifications foundation (Localization removed)
 
 ## Scope
 
-Minimal platform-level foundation cleanup for localization and global in-app notifications, reusing imported baseline runtime services.
+Minimal platform-level foundation cleanup focused on global in-app notifications after localization was explicitly removed from PlatformCore scope.
 
-## Localization foundation
+## Localization status
 
-- `ILocalizationService` expanded from legacy single-method contract into platform API:
-  - active locale (`CurrentLocale`);
-  - locale switch (`SetLocaleAsync`);
-  - key resolving (`TryGet` / `Get`);
-  - formatted resolving (`Get(key, args)`);
-  - locale change event (`LocaleChanged`).
-- `LocalizationServiceBase` now accepts `LocalizationServiceOptions` and no longer hardcodes sample `texts_eng` resource.
-- locale resources are resolved through explicit `LocaleResourcePaths` mapping, so sample/demo text packs stay optional integration payload.
+- Localization foundation removed from PlatformCore runtime/infrastructure scope.
+- `ILocalizationService`, `LocalizationServiceBase`, `LocalizationServiceOptions`, and localization registration extension are no longer part of platform foundation.
+- No replacement localization subsystem is introduced in PlatformCore.
 
 ## Global in-app notifications foundation
 
-- Added platform contract `IGlobalNotificationService` for banner/toast usage.
-- `GlobalNotificationService` now uses `GlobalNotificationServiceOptions`:
+- `IGlobalNotificationService` retained as platform contract for banner/toast usage.
+- `GlobalNotificationService` keeps `GlobalNotificationServiceOptions`:
   - toast item prefab path;
   - optional positive/negative sound events.
 - Removed direct dependency on `ResourcePaths.Sample.*` from notification runtime service.
@@ -28,7 +23,6 @@ Minimal platform-level foundation cleanup for localization and global in-app not
 
 - Notifications still integrate through `IUIService` and `UIBaseElement` views.
 - Added explicit service registration extensions:
-  - `ServiceLocatorLocalizationExtensions.RegisterLocalizationFoundation`;
   - `ServiceLocatorNotificationExtensions.RegisterGlobalNotificationsFoundation`.
 
 ## Platform vs sample boundaries

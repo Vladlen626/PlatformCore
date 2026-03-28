@@ -66,6 +66,12 @@
 - `PlatformCore.Editor` не должен смешиваться с runtime;
 - `PlatformCore.Samples` не должен загрязнять foundation.
 
+### 2.6 Localization вне scope PlatformCore
+
+- Localization intentionally stays outside PlatformCore foundation scope.
+- Platform runtime модули не должны требовать `ILocalizationService`/localization registration для базовой работы.
+- Global in-app notifications остаются platform-level слоем и работают на raw message data.
+
 ---
 
 ## 3. Целевые модули

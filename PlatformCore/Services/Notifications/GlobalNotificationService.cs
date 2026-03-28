@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Services.Audio;
 using PlatformCore.Services.Factory;
@@ -8,7 +7,6 @@ public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationSe
 {
 	private readonly IUIService uiService;
 	private readonly IObjectFactory objectFactory;
-	private readonly ILocalizationService localizationService;
 	private readonly IAudioService audioService;
 	private readonly GlobalNotificationServiceOptions options;
 
@@ -19,51 +17,22 @@ public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationSe
 	public GlobalNotificationService(
 		IUIService uiService,
 		IObjectFactory objectFactory,
-		ILocalizationService localizationService,
 		IAudioService audioService,
 		GlobalNotificationServiceOptions options = null)
 	{
 		this.uiService = uiService;
 		this.objectFactory = objectFactory;
-		this.localizationService = localizationService;
 		this.audioService = audioService;
 		this.options = options ?? new GlobalNotificationServiceOptions();
 		toastQueueTail = UniTask.CompletedTask;
 	}
 
-	public void ShowBanner(string key, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
+	public void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
 	{
-		ShowBannerAsync(key, holdSeconds, isNegative, playSound).Forget();
+		ShowBannerAsync(message, holdSeconds, isNegative, playSound).Forget();
 	}
 
-	public UniTask ShowBannerAsync(string key, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key);
-		return ShowBannerRawAsync(message, holdSeconds, isNegative, playSound);
-	}
-
-	public UniTask ShowBannerAsync(string key, IReadOnlyList<string> args, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key, args);
-		return ShowBannerRawAsync(message, holdSeconds, isNegative, playSound);
-	}
-
-	public void ShowBannerRaw(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
-	{
-		ShowBannerRawAsync(message, holdSeconds, isNegative, playSound).Forget();
-	}
-
-	public async UniTask ShowBannerRawAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
+	public async UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
 	{
 		if (string.IsNullOrWhiteSpace(message))
 		{
@@ -85,39 +54,12 @@ public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationSe
 		await bannerView.PlayAsync(message, holdSeconds, isNegative);
 	}
 
-	public void EnqueueToast(string key, bool isNegative = false)
+	public void EnqueueToast(string message, bool isNegative = false)
 	{
-		EnqueueToastAsync(key, isNegative).Forget();
+		EnqueueToastAsync(message, isNegative).Forget();
 	}
 
-	public UniTask EnqueueToastAsync(string key, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key);
-		return EnqueueToastRawAsync(message, isNegative);
-	}
-
-	public UniTask EnqueueToastAsync(string key, IReadOnlyList<string> args, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key, args);
-		return EnqueueToastRawAsync(message, isNegative);
-	}
-
-	public void EnqueueToastRaw(string message, bool isNegative = false)
-	{
-		EnqueueToastRawAsync(message, isNegative).Forget();
-	}
-
-	public UniTask EnqueueToastRawAsync(string message, bool isNegative = false)
+	public UniTask EnqueueToastAsync(string message, bool isNegative = false)
 	{
 		if (string.IsNullOrWhiteSpace(message))
 		{
@@ -125,34 +67,6 @@ public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationSe
 		}
 
 		return QueueToastInternal(message, isNegative);
-	}
-
-
-	public void ShowToastImmediate(string key, bool isNegative = false)
-	{
-		ShowToastImmediateAsync(key, isNegative).Forget();
-	}
-
-	public UniTask ShowToastImmediateAsync(string key, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key);
-		return ShowToastRawImmediateAsync(message, isNegative);
-	}
-
-	public UniTask ShowToastImmediateAsync(string key, IReadOnlyList<string> args, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(key))
-		{
-			return UniTask.CompletedTask;
-		}
-
-		var message = ResolveMessage(key, args);
-		return ShowToastRawImmediateAsync(message, isNegative);
 	}
 
 	public void ShowToastRawImmediate(string message, bool isNegative = false)
@@ -262,38 +176,6 @@ public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationSe
 		await tcs.Task;
 
 		UnityEngine.Object.Destroy(view.gameObject);
-	}
-
-	private string ResolveMessage(string key)
-	{
-		return localizationService?.Get(key) ?? key;
-	}
-
-	private string ResolveMessage(string key, IReadOnlyList<string> args)
-	{
-		if (localizationService == null)
-		{
-			if (args == null || args.Count == 0)
-			{
-				return key;
-			}
-
-			var messageArgs = ToObjectArray(args);
-			return string.Format(key, messageArgs);
-		}
-
-		return localizationService.Get(key, args);
-	}
-
-	private static object[] ToObjectArray(IReadOnlyList<string> args)
-	{
-		var data = new object[args.Count];
-		for (var i = 0; i < args.Count; i++)
-		{
-			data[i] = args[i];
-		}
-
-		return data;
 	}
 
 	private void PlayNotificationSound(bool isNegative)
