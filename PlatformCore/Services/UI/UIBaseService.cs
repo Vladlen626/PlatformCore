@@ -66,7 +66,7 @@ namespace PlatformCore.Services.UI
 		}
 
 		// === SHOW ===
-		public T GetWindow<T>() where T : UIBaseElement
+		public T Show<T>() where T : UIBaseElement
 		{
 			var type = typeof(T);
 			if (!_windows.TryGetValue(type, out var window))
@@ -83,6 +83,11 @@ namespace PlatformCore.Services.UI
 			window.gameObject.SetActive(true);
 			window.Show();
 			return (T)window;
+		}
+
+		public T GetWindow<T>() where T : UIBaseElement
+		{
+			return Show<T>();
 		}
 
 		public bool IsShowed<T>() where T : UIBaseElement

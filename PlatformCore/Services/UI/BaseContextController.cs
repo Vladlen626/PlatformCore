@@ -22,7 +22,7 @@ namespace PlatformCore.Services.UI
 
 		public void Activate()
 		{
-			_context = _uiService.GetWindow<T>();
+			_context = _uiService.Show<T>();
 			OnActivate();
 		}
 		
