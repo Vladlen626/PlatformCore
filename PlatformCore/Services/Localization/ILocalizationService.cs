@@ -1,11 +1,14 @@
+using System;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+
 public interface ILocalizationService
 {
-	//TODO: Предлагаю сделать статическим классом. Убрать интерфейс
-	// Хочется в любой части кода писать LocalizationService.GetCurrentLocale ( получаешь EN-RU и т.п.)
-	// Добавить Action OnLocaleChanged, чтоб подписываться на это и автоматически переводить все LocalizedText.
-	// В одной московской компании это примерно так))
+	string CurrentLocale { get; }
+	event Action<string> LocaleChanged;
 
-	// todo: 
-	// SetLocalization()
-	public string GetLocalized(string id);
+	UniTask SetLocaleAsync(string locale);
+	bool TryGet(string key, out string value);
+	string Get(string key);
+	string Get(string key, IReadOnlyList<string> args);
 }
