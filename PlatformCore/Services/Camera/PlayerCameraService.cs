@@ -8,14 +8,9 @@ using UnityEngine;
 
 namespace PlatformCore.Services
 {
-	public enum CameraStateEnum
+	public static class CameraIds
 	{
-		FirstPerson,
-		MainMenu,
-		TrainWatch,
-		DiceGame,
-		DiceGameCombinations,
-		Inventory
+		public const string Primary = "primary";
 	}
 
 	public class CameraService : BaseAsyncService, ICameraService
@@ -31,11 +26,11 @@ namespace PlatformCore.Services
 
 		private CinemachineCamera currentCamera;
 		private CinemachineBrain brain;
-		public CameraStateEnum ActiveCameraState { get; private set; }
-		public event Action<CameraStateEnum> ActiveCameraChanged;
+		public string ActiveCameraId { get; private set; }
+		public event Action<string> ActiveCameraChanged;
 
-		private readonly Dictionary<CameraStateEnum, CinemachineCamera> allCameras =
-			new Dictionary<CameraStateEnum, CinemachineCamera>();
+		private readonly Dictionary<string, CinemachineCamera> allCameras =
+			new Dictionary<string, CinemachineCamera>();
 
 		public CameraService(IObjectFactory objectFactory, Transform cameraParent = null)
 		{
@@ -51,9 +46,9 @@ namespace PlatformCore.Services
 				Vector3.zero, Quaternion.identity, _cameraParent);
 			_noise = (CinemachineBasicMultiChannelPerlin)_camera.GetCinemachineComponent(CinemachineCore.Stage.Noise);
 			_camera.name = PlayerCamera;
-			allCameras.Add(CameraStateEnum.FirstPerson, _camera);
+			allCameras.Add(CameraIds.Primary, _camera);
 
-			SetActiveCamera(CameraStateEnum.FirstPerson);
+			SetActiveCamera(CameraIds.Primary);
 		}
 
 		public override void Dispose()
@@ -72,9 +67,13 @@ namespace PlatformCore.Services
 			currentCamera = null;
 		}
 
-		public void AttachPlayerCameraTo(Transform target)
+		public void AttachPrimaryCameraTo(Transform target)
 		{
-			var _camera = allCameras[CameraStateEnum.FirstPerson];
+			if (!allCameras.TryGetValue(CameraIds.Primary, out var _camera))
+			{
+				return;
+			}
+
 			if (_camera == null || target == null)
 			{
 				return;
@@ -88,35 +87,35 @@ namespace PlatformCore.Services
 			_camera.LookAt = null;
 		}
 		
-		public async UniTask SetActiveCameraAsync(CameraStateEnum state, CancellationToken ct = default)
+		public async UniTask SetActiveCameraAsync(string cameraId, CancellationToken ct = default)
 		{
-			if (allCameras == null || !allCameras.ContainsKey(state))
+			if (allCameras == null || !allCameras.ContainsKey(cameraId))
 			{
-				Debug.LogWarning($"Camera {state} not found!");
+				Debug.LogWarning($"Camera {cameraId} not found!");
 				return;
 			}
 			
 			if (brain == null)
 			{
 				Debug.LogWarning("No CinemachineBrain found on main camera!");
-				SetActiveCamera(state); // fallback
+				SetActiveCamera(cameraId);
 				return;
 			}
-			
-			SetActiveCamera(state);
+
+			SetActiveCamera(cameraId);
 
 			await UniTask.WaitUntil(() => !brain.IsBlending, cancellationToken: ct);
 		}
 
-		public void SetActiveCamera(CameraStateEnum state)
+		public void SetActiveCamera(string cameraId)
 		{
-			if (allCameras == null || !allCameras.ContainsKey(state))
+			if (allCameras == null || !allCameras.ContainsKey(cameraId))
 			{
-				Debug.LogWarning($"Camera {state} not found!");
+				Debug.LogWarning($"Camera {cameraId} not found!");
 				return;
 			}
 
-			if (currentCamera == allCameras[state] && ActiveCameraState == state)
+			if (currentCamera == allCameras[cameraId] && ActiveCameraId == cameraId)
 			{
 				return;
 			}
@@ -128,23 +127,25 @@ namespace PlatformCore.Services
 				currentCamera.gameObject.SetActive(false);
 			}
 
-			currentCamera = allCameras[state];
+			currentCamera = allCameras[cameraId];
 			currentCamera.gameObject.SetActive(true);
-			ActiveCameraState = state;
-			ActiveCameraChanged?.Invoke(state);
+			ActiveCameraId = cameraId;
+			ActiveCameraChanged?.Invoke(cameraId);
 
 
 			_noise = (CinemachineBasicMultiChannelPerlin)currentCamera.GetCinemachineComponent(CinemachineCore.Stage
 				.Noise);
 		}
 
-		public void AddCamera(CameraStateEnum state, CinemachineCamera camera)
+		public void AddCamera(string cameraId, CinemachineCamera camera)
 		{
-			if (camera == null || allCameras.ContainsKey(state))
+			if (string.IsNullOrWhiteSpace(cameraId) || camera == null || allCameras.ContainsKey(cameraId))
+			{
 				return;
+			}
 
-			camera.gameObject.SetActive(false); // деактивируем по умолчанию
-			allCameras.Add(state, camera);
+			camera.gameObject.SetActive(false);
+			allCameras.Add(cameraId, camera);
 		}
 
 		public Transform GetCameraTransform()
