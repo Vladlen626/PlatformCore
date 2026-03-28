@@ -11,6 +11,7 @@ namespace PlatformCore.Services.Audio
 	public class AudioBaseService : IAudioService, IService
 	{
 		private readonly ILoggerService _logger;
+		private readonly AudioBaseServiceOptions _options;
 
 		private EventInstance _currentMusic;
 		private float _masterVolume = 0.8f;
@@ -26,9 +27,10 @@ namespace PlatformCore.Services.Audio
 		public float MusicVolume => _musicVolume;
 		public float SfxVolume => _sfxVolume;
 
-		public AudioBaseService(ILoggerService logger)
+		public AudioBaseService(ILoggerService logger, AudioBaseServiceOptions options = null)
 		{
 			_logger = logger;
+			_options = options ?? new AudioBaseServiceOptions();
 		}
 
 		public async UniTask PrewarmEventAsync(string eventPath)
@@ -183,27 +185,32 @@ namespace PlatformCore.Services.Audio
 
 		public void SetMasterVolume(float volume)
 		{
-			_masterVolume = Mathf.Clamp01(volume);
-			ApplyVolume();
+			ApplyVolumeSettings(volume, _musicVolume, _sfxVolume, _isMuted);
 		}
 
 		public void SetMusicVolume(float volume)
 		{
-			_musicVolume = Mathf.Clamp01(volume);
-			ApplyVolume();
+			ApplyVolumeSettings(_masterVolume, volume, _sfxVolume, _isMuted);
 		}
 
 		public void SetSfxVolume(float volume)
 		{
-			_sfxVolume = Mathf.Clamp01(volume);
-			ApplyVolume();
+			ApplyVolumeSettings(_masterVolume, _musicVolume, volume, _isMuted);
 		}
 
 		public void SetMuted(bool muted)
 		{
+			ApplyVolumeSettings(_masterVolume, _musicVolume, _sfxVolume, muted);
+			_logger?.Log($"[AudioService] Audio {(muted ? "muted" : "unmuted")}");
+		}
+
+		public void ApplyVolumeSettings(float masterVolume, float musicVolume, float sfxVolume, bool muted)
+		{
+			_masterVolume = Mathf.Clamp01(masterVolume);
+			_musicVolume = Mathf.Clamp01(musicVolume);
+			_sfxVolume = Mathf.Clamp01(sfxVolume);
 			_isMuted = muted;
 			ApplyVolume();
-			_logger?.Log($"[AudioService] Audio {(muted ? "muted" : "unmuted")}");
 		}
 
 		private void ApplyVolume()
@@ -212,13 +219,13 @@ namespace PlatformCore.Services.Audio
 			{
 				float finalVolume = _isMuted ? 0f : _masterVolume;
 
-				var masterBus = RuntimeManager.GetBus("bus:/");
+				var masterBus = RuntimeManager.GetBus(_options.MasterBusPath);
 				masterBus.setVolume(finalVolume);
 
-				var musicBus = RuntimeManager.GetBus("bus:/Music");
+				var musicBus = RuntimeManager.GetBus(_options.MusicBusPath);
 				musicBus.setVolume(_musicVolume);
 
-				var sfxBus = RuntimeManager.GetBus("bus:/SFX");
+				var sfxBus = RuntimeManager.GetBus(_options.SfxBusPath);
 				sfxBus.setVolume(_sfxVolume);
 			}
 			catch (Exception ex)
