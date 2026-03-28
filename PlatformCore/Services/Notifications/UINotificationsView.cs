@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class UINotificationsView : UIBaseElement
 {
-	[SerializeField] 
+	[SerializeField]
 	private Transform list;
 
 	public Transform List => list;
@@ -19,11 +19,6 @@ public class UINotificationsView : UIBaseElement
 			rect.offsetMin = Vector2.zero;
 			rect.offsetMax = Vector2.zero;
 			rect.pivot = new Vector2(0.5f, 0.5f);
-		}
-
-		if (!list)
-		{
-			list = transform.Find("PanelNotifications");
 		}
 	}
 }

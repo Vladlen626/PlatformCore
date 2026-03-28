@@ -18,6 +18,9 @@ namespace PlatformCore.Services.Factory
 				public const string ColorStyleLibrary = "UI/ColorStyleLibrary";
 				public const string TextStyleLibrary = "UI/TextStyleLibrary";
 				public const string UICursorView = "UI/UICursorView";
+				public const string UIGlobalNotificationView = "UI/UIGlobalNotificationView";
+				public const string UINotificationsView = "UI/UINotificationsView";
+				public const string UINotificationView = "UI/UINotificationView";
 			}
 		}
 	}
