@@ -6,6 +6,14 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 {
 	public static class ServiceLocatorFishNetExtensions
 	{
+		public static INetworkSessionService RegisterFishNetFoundation(this ServiceLocator serviceLocator, ILoggerService loggerService = null)
+		{
+			var lifecycleService = serviceLocator.Get<LifecycleService>();
+			var networkSessionBridge = new FishNetSessionBridge();
+			serviceLocator.Register<INetworkSessionBridge, FishNetSessionBridge>(networkSessionBridge);
+			return serviceLocator.RegisterFishNetFoundation(lifecycleService, networkSessionBridge, loggerService);
+		}
+
 		public static INetworkSessionService RegisterFishNetFoundation(this ServiceLocator serviceLocator,
 			LifecycleService lifecycleService,
 			INetworkSessionBridge networkSessionBridge,

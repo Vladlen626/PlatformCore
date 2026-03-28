@@ -14,5 +14,10 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 			Snapshot = new NetworkSessionSnapshot(isServerStarted, isClientStarted);
 			SessionStateChanged?.Invoke(Snapshot);
 		}
+
+		public void Dispose()
+		{
+			SessionStateChanged = null;
+		}
 	}
 }

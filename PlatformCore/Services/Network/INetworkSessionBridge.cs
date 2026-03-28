@@ -2,7 +2,7 @@ using System;
 
 namespace PlatformCore.Services.Network
 {
-	public interface INetworkSessionBridge
+	public interface INetworkSessionBridge : IService
 	{
 		NetworkSessionSnapshot Snapshot { get; }
 		event Action<NetworkSessionSnapshot> SessionStateChanged;
