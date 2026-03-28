@@ -112,6 +112,16 @@
 - placeholder materials / textures
 - generated resource path file
 
+### 3.9 Notifications
+
+Уже присутствуют:
+
+- `IGlobalNotificationService`;
+- `GlobalNotificationService`;
+- banner/toast UI integration.
+
+Примечание: localization subsystem не считается частью целевого PlatformCore и не входит в platform foundation scope.
+
 ---
 
 ## 4. Общая оценка слоёв

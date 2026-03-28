@@ -10,14 +10,12 @@ namespace PlatformCore.Infrastructure.Notifications
 		public static IGlobalNotificationService RegisterGlobalNotificationsFoundation(this ServiceLocator serviceLocator,
 			IUIService uiService,
 			IObjectFactory objectFactory,
-			ILocalizationService localizationService,
 			IAudioService audioService,
 			GlobalNotificationServiceOptions options = null)
 		{
 			var notificationService = new GlobalNotificationService(
 				uiService,
 				objectFactory,
-				localizationService,
 				audioService,
 				options);
 			serviceLocator.Register<IGlobalNotificationService, GlobalNotificationService>(notificationService);

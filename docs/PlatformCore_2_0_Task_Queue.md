@@ -244,7 +244,7 @@
 
 ---
 
-## Пачка 10. Localization + Global Notifications
+## Пачка 10. Global Notifications (без Localization)
 
 ### Цель
 
@@ -252,8 +252,8 @@
 
 ### Что сделать
 
-- localization foundation;
 - global in-app notifications;
+- чистый notifications API без зависимости на localization contracts/services.
 - без переноса D6 prefab pack как обязательной части foundation.
 
 ---

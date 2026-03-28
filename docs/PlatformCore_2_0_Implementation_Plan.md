@@ -141,7 +141,7 @@ PlatformCore 2.0 — это слой над Unity для быстрой сбор
 
 - `Settings` как цельный слой отсутствует;
 - `SceneManagement` как цельный слой отсутствует;
-- `Localization` начат, но не доведён;
+- `Localization` сознательно выведен за границы PlatformCore;
 - `UI` находится скорее в состоянии частичного legacy import, чем законченного platform module;
 - `Audio` и `Camera` пока скорее imported services внутри legacy-сборки, чем завершённые независимые модули.
 
@@ -594,12 +594,12 @@ Reusable gameplay blocks только после стабилизации founda
 - reusable camera mode policy;
 - удаление project-specific режимов.
 
-### Этап 9. Localization and Notifications
+### Этап 9. Global Notifications Foundation
 
 После стабилизации foundation можно переносить следующие reusable слои:
 
-- localization foundation;
-- global notifications foundation.
+- global in-app notifications foundation;
+- runtime notifications API без зависимости на localization subsystem.
 
 ### Этап 10. Reusable Gameplay Layer
 

@@ -84,7 +84,8 @@ Foundation baseline уже импортирован в репозиторий `P
 - полноценный settings module;
 - полноценный scene management module;
 - глобальный rewrite audio/camera/UI;
-- большой rename/refactor всего imported foundation.
+- большой rename/refactor всего imported foundation;
+- localization subsystem как часть PlatformCore foundation (выведен за границы платформы).
 
 Допустимы только локальные исправления, которые реально нужны для стабилизации already imported baseline.
 
