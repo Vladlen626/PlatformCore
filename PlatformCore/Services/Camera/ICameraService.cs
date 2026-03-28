@@ -8,12 +8,12 @@ namespace PlatformCore.Services
 {
 	public interface ICameraService : ICameraShakeService
 	{
-		CameraStateEnum ActiveCameraState { get; }
-		event Action<CameraStateEnum> ActiveCameraChanged;
-		void SetActiveCamera(CameraStateEnum state);
-		UniTask SetActiveCameraAsync(CameraStateEnum state, CancellationToken ct = default);
-		void AddCamera(CameraStateEnum state, CinemachineCamera camera);
-		void AttachPlayerCameraTo(Transform target);
+		string ActiveCameraId { get; }
+		event Action<string> ActiveCameraChanged;
+		void SetActiveCamera(string cameraId);
+		UniTask SetActiveCameraAsync(string cameraId, CancellationToken ct = default);
+		void AddCamera(string cameraId, CinemachineCamera camera);
+		void AttachPrimaryCameraTo(Transform target);
 		Transform GetCameraTransform();
 		void SetFOV(float fov);
 		float GetFOV();

@@ -4,16 +4,16 @@ using UnityEngine;
 
 namespace PlatformCore.Services
 {
-	// TODO: ВАААЩЕЕЕ НЕ НРАВИТСЯ, но на скорую руку так
 	[RequireComponent(typeof(CinemachineCamera))]
 	public class CinemachineCameraRegister : MonoBehaviour
 	{
 		[SerializeField]
-		private CameraStateEnum cameraStateEnum;
+		private string _cameraId = CameraIds.Primary;
+
 		private void Awake()
 		{
 			var cinemachineCamera = GetComponent<CinemachineCamera>();
-			Locator.Resolve<ICameraService>().AddCamera(cameraStateEnum, cinemachineCamera);
+			Locator.Resolve<ICameraService>().AddCamera(_cameraId, cinemachineCamera);
 		}
 	}
 }
