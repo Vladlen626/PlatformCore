@@ -1,12 +1,10 @@
 using System;
-using PlatformCore.Core;
-using PlatformCore.Core.Lifecycle;
 using PlatformCore.Services;
 using PlatformCore.Services.Network;
 
 namespace PlatformCore.Infrastructure.Network.FishNet
 {
-	public sealed class NetworkSessionService : INetworkSessionService, IBaseController, IActivatable, IDeactivatable
+	public sealed class NetworkSessionService : INetworkSessionService
 	{
 		private readonly INetworkSessionBridge _networkSessionBridge;
 		private readonly ILoggerService _loggerService;
@@ -23,7 +21,7 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 
 		public event Action<NetworkSessionSnapshot> SessionStateChanged;
 
-		public void Activate()
+		public void StartSessionTracking()
 		{
 			if (_isSubscribed)
 			{
@@ -36,7 +34,7 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 			_loggerService?.Log("[NetworkSessionService] FishNet session hooks activated.");
 		}
 
-		public void Deactivate()
+		public void StopSessionTracking()
 		{
 			if (_isSubscribed == false)
 			{
@@ -50,7 +48,7 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 
 		public void Dispose()
 		{
-			Deactivate();
+			StopSessionTracking();
 			SessionStateChanged = null;
 		}
 
