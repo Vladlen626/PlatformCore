@@ -1,3 +1,4 @@
+#if FMOD_PRESENT
 ﻿using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -246,3 +247,71 @@ namespace PlatformCore.Services.Audio
 		}
 	}
 }
+
+#else
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
+namespace PlatformCore.Services.Audio
+{
+	public class AudioBaseService : IAudioService, IService
+	{
+		private readonly ILoggerService _logger;
+		private float _masterVolume = 0.8f;
+		private float _musicVolume = 0.5f;
+		private float _sfxVolume = 0.5f;
+		private bool _isMuted;
+
+		public bool IsMuted => _isMuted;
+		public float MasterVolume => _masterVolume;
+		public float MusicVolume => _musicVolume;
+		public float SfxVolume => _sfxVolume;
+
+		public AudioBaseService(ILoggerService logger, AudioBaseServiceOptions options = null)
+		{
+			_logger = logger;
+			_logger?.Log("[AudioService] FMOD is not installed. AudioBaseService is running in no-op mode.");
+		}
+
+		public UniTask PrewarmEventAsync(string eventPath) => UniTask.CompletedTask;
+		public UniTask PlayMusicAsync(string eventPath, float fadeTime = 1f) => UniTask.CompletedTask;
+		public UniTask StopMusicAsync(float fadeTime = 1f) => UniTask.CompletedTask;
+		public void PlaySoundParallel(string eventPath) { }
+		public void StopParallelSound(string eventPath) { }
+		public void PlaySound(string eventPath) { }
+		public void PlaySoundAt(string eventPath, Vector3 position) { }
+
+		public void SetMasterVolume(float volume)
+		{
+			ApplyVolumeSettings(volume, _musicVolume, _sfxVolume, _isMuted);
+		}
+
+		public void SetMusicVolume(float volume)
+		{
+			ApplyVolumeSettings(_masterVolume, volume, _sfxVolume, _isMuted);
+		}
+
+		public void SetSfxVolume(float volume)
+		{
+			ApplyVolumeSettings(_masterVolume, _musicVolume, volume, _isMuted);
+		}
+
+		public void SetMuted(bool muted)
+		{
+			ApplyVolumeSettings(_masterVolume, _musicVolume, _sfxVolume, muted);
+		}
+
+		public void ApplyVolumeSettings(float masterVolume, float musicVolume, float sfxVolume, bool muted)
+		{
+			_masterVolume = Mathf.Clamp01(masterVolume);
+			_musicVolume = Mathf.Clamp01(musicVolume);
+			_sfxVolume = Mathf.Clamp01(sfxVolume);
+			_isMuted = muted;
+		}
+
+		public void Dispose()
+		{
+		}
+	}
+}
+#endif

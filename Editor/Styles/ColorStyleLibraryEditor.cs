@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using _Main.Scripts.UI;
+using PlatformCore.Services.UI.Styles;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;

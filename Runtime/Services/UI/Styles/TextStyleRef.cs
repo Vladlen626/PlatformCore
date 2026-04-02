@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 
-namespace _Main.Scripts.UI
+namespace PlatformCore.Services.UI.Styles
 {
 	[Serializable]
 	public struct TextStyleRef

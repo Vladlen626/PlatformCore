@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace _Main.Scripts.UI
+namespace PlatformCore.Services.UI.Styles
 {
 	public static class ColorStyleLibraryProvider
 	{

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using _Main.Scripts.UI;
+using PlatformCore.Services.UI.Styles;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 

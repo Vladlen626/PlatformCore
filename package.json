@@ -11,7 +11,8 @@
     "com.unity.cinemachine": "3.1.4",
     "com.unity.inputsystem": "1.14.1",
     "com.unity.textmeshpro": "3.2.0-pre.10",
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.cysharp.unitask": "2.5.10"
   },
   "samples": [
     {

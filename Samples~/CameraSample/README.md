@@ -1,3 +1,5 @@
 # CameraSample
 
-Shows camera service usage with Cinemachine camera registration and switching.
+This sample is a **minimal camera wiring example** (service + registration flow).
+
+It is not a complete camera gameplay demo.

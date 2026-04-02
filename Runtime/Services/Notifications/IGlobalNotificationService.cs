@@ -1,10 +1,13 @@
 using Cysharp.Threading.Tasks;
 
-public interface IGlobalNotificationService
+namespace PlatformCore.Services.Notifications
 {
-	void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true);
-	UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true);
+	public interface IGlobalNotificationService
+	{
+		void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true);
+		UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true);
 
-	void EnqueueToast(string message, bool isNegative = false);
-	UniTask EnqueueToastAsync(string message, bool isNegative = false);
+		void EnqueueToast(string message, bool isNegative = false);
+		UniTask EnqueueToastAsync(string message, bool isNegative = false);
+	}
 }

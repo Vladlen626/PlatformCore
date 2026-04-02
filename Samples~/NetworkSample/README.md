@@ -1,5 +1,6 @@
 # NetworkSample (Optional)
 
-Optional networking demo based on FishNet integrations.
+This sample is an **optional FishNet demo scaffold**.
 
 > FishNet is not required for the base package.
+> This sample is not a complete multiplayer game/demo.

@@ -3,196 +3,199 @@ using PlatformCore.Services.Audio;
 using PlatformCore.Services.Factory;
 using PlatformCore.Services.UI;
 
-public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationService
+namespace PlatformCore.Services.Notifications
 {
-	private readonly IUIService uiService;
-	private readonly IObjectFactory objectFactory;
-	private readonly IAudioService audioService;
-	private readonly GlobalNotificationServiceOptions options;
-
-	private UIGlobalNotificationView bannerView;
-	private UINotificationsView notificationsView;
-	private UniTask toastQueueTail;
-
-	public GlobalNotificationService(
-		IUIService uiService,
-		IObjectFactory objectFactory,
-		IAudioService audioService,
-		GlobalNotificationServiceOptions options = null)
+	public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationService
 	{
-		this.uiService = uiService;
-		this.objectFactory = objectFactory;
-		this.audioService = audioService;
-		this.options = options ?? new GlobalNotificationServiceOptions();
-		toastQueueTail = UniTask.CompletedTask;
-	}
+		private readonly IUIService uiService;
+		private readonly IObjectFactory objectFactory;
+		private readonly IAudioService audioService;
+		private readonly GlobalNotificationServiceOptions options;
 
-	public void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
-	{
-		ShowBannerAsync(message, holdSeconds, isNegative, playSound).Forget();
-	}
+		private UIGlobalNotificationView bannerView;
+		private UINotificationsView notificationsView;
+		private UniTask toastQueueTail;
 
-	public async UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
-	{
-		if (string.IsNullOrWhiteSpace(message))
+		public GlobalNotificationService(
+			IUIService uiService,
+			IObjectFactory objectFactory,
+			IAudioService audioService,
+			GlobalNotificationServiceOptions options = null)
 		{
-			return;
+			this.uiService = uiService;
+			this.objectFactory = objectFactory;
+			this.audioService = audioService;
+			this.options = options ?? new GlobalNotificationServiceOptions();
+			toastQueueTail = UniTask.CompletedTask;
 		}
 
-		await EnsureBannerViewAsync();
-		if (!bannerView)
+		public void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
 		{
-			return;
+			ShowBannerAsync(message, holdSeconds, isNegative, playSound).Forget();
 		}
 
-		bannerView.Interrupt();
-		if (playSound)
+		public async UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
 		{
-			PlayNotificationSound(isNegative);
+			if (string.IsNullOrWhiteSpace(message))
+			{
+				return;
+			}
+
+			await EnsureBannerViewAsync();
+			if (!bannerView)
+			{
+				return;
+			}
+
+			bannerView.Interrupt();
+			if (playSound)
+			{
+				PlayNotificationSound(isNegative);
+			}
+
+			await bannerView.PlayAsync(message, holdSeconds, isNegative);
 		}
 
-		await bannerView.PlayAsync(message, holdSeconds, isNegative);
-	}
-
-	public void EnqueueToast(string message, bool isNegative = false)
-	{
-		EnqueueToastAsync(message, isNegative).Forget();
-	}
-
-	public UniTask EnqueueToastAsync(string message, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(message))
+		public void EnqueueToast(string message, bool isNegative = false)
 		{
-			return UniTask.CompletedTask;
+			EnqueueToastAsync(message, isNegative).Forget();
 		}
 
-		return QueueToastInternal(message, isNegative);
-	}
-
-	public void ShowToastRawImmediate(string message, bool isNegative = false)
-	{
-		ShowToastRawImmediateAsync(message, isNegative).Forget();
-	}
-
-	public UniTask ShowToastRawImmediateAsync(string message, bool isNegative = false)
-	{
-		if (string.IsNullOrWhiteSpace(message))
+		public UniTask EnqueueToastAsync(string message, bool isNegative = false)
 		{
-			return UniTask.CompletedTask;
+			if (string.IsNullOrWhiteSpace(message))
+			{
+				return UniTask.CompletedTask;
+			}
+
+			return QueueToastInternal(message, isNegative);
 		}
 
-		return ShowToastInternal(message, isNegative);
-	}
-
-	private async UniTask EnsureBannerViewAsync()
-	{
-		if (bannerView)
+		public void ShowToastRawImmediate(string message, bool isNegative = false)
 		{
-			return;
+			ShowToastRawImmediateAsync(message, isNegative).Forget();
 		}
 
-		if (uiService == null)
+		public UniTask ShowToastRawImmediateAsync(string message, bool isNegative = false)
 		{
-			return;
+			if (string.IsNullOrWhiteSpace(message))
+			{
+				return UniTask.CompletedTask;
+			}
+
+			return ShowToastInternal(message, isNegative);
 		}
 
-		await uiService.PreloadAsync<UIGlobalNotificationView>();
-		bannerView = uiService.GetWindow<UIGlobalNotificationView>();
-		if (bannerView)
+		private async UniTask EnsureBannerViewAsync()
 		{
-			bannerView.Hide();
-		}
-	}
+			if (bannerView)
+			{
+				return;
+			}
 
-	private async UniTask EnsureNotificationsViewAsync()
-	{
-		if (notificationsView)
-		{
-			return;
-		}
+			if (uiService == null)
+			{
+				return;
+			}
 
-		if (uiService == null)
-		{
-			return;
-		}
-
-		await uiService.PreloadAsync<UINotificationsView>();
-		notificationsView = uiService.GetWindow<UINotificationsView>();
-		if (notificationsView)
-		{
-			notificationsView.Show();
-		}
-	}
-
-	private async UniTask QueueToastInternal(string message, bool isNegative)
-	{
-		var previous = toastQueueTail;
-		var tcs = new UniTaskCompletionSource();
-		toastQueueTail = tcs.Task;
-
-		await previous;
-		await ShowToastInternal(message, isNegative);
-
-		tcs.TrySetResult();
-	}
-
-	private async UniTask ShowToastInternal(string message, bool isNegative)
-	{
-		await EnsureNotificationsViewAsync();
-		if (!notificationsView || objectFactory == null || string.IsNullOrWhiteSpace(options.ToastItemResourcePath))
-		{
-			return;
+			await uiService.PreloadAsync<UIGlobalNotificationView>();
+			bannerView = uiService.GetWindow<UIGlobalNotificationView>();
+			if (bannerView)
+			{
+				bannerView.Hide();
+			}
 		}
 
-		var parent = notificationsView.List ? notificationsView.List : notificationsView.transform;
-		var view = await objectFactory.CreateAsync<UINotificationView>(
-			options.ToastItemResourcePath,
-			UnityEngine.Vector3.zero,
-			UnityEngine.Quaternion.identity,
-			parent);
-
-		if (!view)
+		private async UniTask EnsureNotificationsViewAsync()
 		{
-			return;
+			if (notificationsView)
+			{
+				return;
+			}
+
+			if (uiService == null)
+			{
+				return;
+			}
+
+			await uiService.PreloadAsync<UINotificationsView>();
+			notificationsView = uiService.GetWindow<UINotificationsView>();
+			if (notificationsView)
+			{
+				notificationsView.Show();
+			}
 		}
 
-		if (parent && view.transform is UnityEngine.RectTransform rect)
+		private async UniTask QueueToastInternal(string message, bool isNegative)
 		{
-			rect.SetParent(parent, false);
-		}
+			var previous = toastQueueTail;
+			var tcs = new UniTaskCompletionSource();
+			toastQueueTail = tcs.Task;
 
-		var tcs = new UniTaskCompletionSource();
-		void OnShowed(UINotificationView v)
-		{
-			view.Showed -= OnShowed;
+			await previous;
+			await ShowToastInternal(message, isNegative);
+
 			tcs.TrySetResult();
 		}
 
-		view.Showed += OnShowed;
-		view.SetText(message, isNegative);
-		PlayNotificationSound(isNegative);
-		view.Show();
-
-		await tcs.Task;
-
-		UnityEngine.Object.Destroy(view.gameObject);
-	}
-
-	private void PlayNotificationSound(bool isNegative)
-	{
-		if (audioService == null)
+		private async UniTask ShowToastInternal(string message, bool isNegative)
 		{
-			return;
+			await EnsureNotificationsViewAsync();
+			if (!notificationsView || objectFactory == null || string.IsNullOrWhiteSpace(options.ToastItemResourcePath))
+			{
+				return;
+			}
+
+			var parent = notificationsView.List ? notificationsView.List : notificationsView.transform;
+			var view = await objectFactory.CreateAsync<UINotificationView>(
+				options.ToastItemResourcePath,
+				UnityEngine.Vector3.zero,
+				UnityEngine.Quaternion.identity,
+				parent);
+
+			if (!view)
+			{
+				return;
+			}
+
+			if (parent && view.transform is UnityEngine.RectTransform rect)
+			{
+				rect.SetParent(parent, false);
+			}
+
+			var tcs = new UniTaskCompletionSource();
+			void OnShowed(UINotificationView v)
+			{
+				view.Showed -= OnShowed;
+				tcs.TrySetResult();
+			}
+
+			view.Showed += OnShowed;
+			view.SetText(message, isNegative);
+			PlayNotificationSound(isNegative);
+			view.Show();
+
+			await tcs.Task;
+
+			UnityEngine.Object.Destroy(view.gameObject);
 		}
 
-		var soundEvent = isNegative
-			? options.NegativeNotificationSound
-			: options.PositiveNotificationSound;
-		if (string.IsNullOrWhiteSpace(soundEvent))
+		private void PlayNotificationSound(bool isNegative)
 		{
-			return;
-		}
+			if (audioService == null)
+			{
+				return;
+			}
 
-		audioService.PlaySound(soundEvent);
+			var soundEvent = isNegative
+				? options.NegativeNotificationSound
+				: options.PositiveNotificationSound;
+			if (string.IsNullOrWhiteSpace(soundEvent))
+			{
+				return;
+			}
+
+			audioService.PlaySound(soundEvent);
+		}
 	}
 }
