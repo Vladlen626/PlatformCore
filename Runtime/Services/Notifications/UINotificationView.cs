@@ -1,94 +1,123 @@
 using System;
-using DG.Tweening;
 using PlatformCore.Services.UI;
+using PlatformCore.Services.UI.Styles;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using _Main.Scripts.UI;
 
-public class UINotificationView : UIBaseElement
+namespace PlatformCore.Services.Notifications
 {
-	[SerializeField] private CanvasGroup canvasGroup;
-	[SerializeField] private RectTransform contentRoot;
-	[SerializeField] private UIBackgroundSizer backgroundSizer;
-	[SerializeField] private Image backgroundImage;
-	[SerializeField] private float initialShift = 50f;
-	[SerializeField] private float smoothDuration = 0.5f;
-	[SerializeField] private float fadeDuration = 0.3f;
-	[SerializeField] private float showDelay = 2f;
-
-	[SerializeField] private TextMeshProUGUI text;
-	[SerializeField] private ColorStyleRef positiveColor;
-	[SerializeField] private ColorStyleRef negativeColor;
-
-	private Vector2 originalPos;
-	private Sequence fullSequence;
-
-	public event Action<UINotificationView> Showed;
-
-	public void SetText(string value, bool isNegative = false)
+	public class UINotificationView : UIBaseElement
 	{
-		text.text = value;
-		ApplyToneColor(isNegative);
-		if (backgroundSizer)
-		{
-			backgroundSizer.Refresh();
-		}
-	}
+		[SerializeField] private CanvasGroup canvasGroup;
+		[SerializeField] private RectTransform contentRoot;
+		[SerializeField] private UIBackgroundSizer backgroundSizer;
+		[SerializeField] private Image backgroundImage;
+		[SerializeField] private float initialShift = 50f;
+		[SerializeField] private float smoothDuration = 0.5f;
+		[SerializeField] private float fadeDuration = 0.3f;
+		[SerializeField] private float showDelay = 2f;
 
-	private void ApplyToneColor(bool isNegative)
-	{
-		if (!backgroundImage)
+		[SerializeField] private TextMeshProUGUI text;
+		[SerializeField] private ColorStyleRef positiveColor;
+		[SerializeField] private ColorStyleRef negativeColor;
+
+		private Vector2 originalPos;
+		private Coroutine animationRoutine;
+
+		public event Action<UINotificationView> Showed;
+
+		public void SetText(string value, bool isNegative = false)
 		{
-			throw new InvalidOperationException("Notification background image is not assigned.");
+			text.text = value;
+			ApplyToneColor(isNegative);
+			if (backgroundSizer)
+			{
+				backgroundSizer.Refresh();
+			}
 		}
 
-		var style = isNegative ? negativeColor : positiveColor;
-		if (string.IsNullOrWhiteSpace(style.Id))
+		private void ApplyToneColor(bool isNegative)
 		{
-			var tone = isNegative ? "Negative" : "Positive";
-			throw new InvalidOperationException($"{tone} notification color style is not assigned.");
+			if (!backgroundImage)
+			{
+				throw new InvalidOperationException("Notification background image is not assigned.");
+			}
+
+			var style = isNegative ? negativeColor : positiveColor;
+			if (string.IsNullOrWhiteSpace(style.Id))
+			{
+				var tone = isNegative ? "Negative" : "Positive";
+				throw new InvalidOperationException($"{tone} notification color style is not assigned.");
+			}
+
+			backgroundImage.color = style.Value;
 		}
 
-		backgroundImage.color = style.Value;
-	}
-
-	protected override void OnAwake()
-	{
-		base.OnAwake();
-		canvasGroup.alpha = 0f;
-		text.gameObject.SetActive(false);
-	}
-
-	protected override void OnShow()
-	{
-		base.OnShow();
-
-		originalPos = contentRoot.anchoredPosition;
-		contentRoot.anchoredPosition = originalPos + Vector2.down * initialShift;
-		canvasGroup.alpha = 0f;
-		text.gameObject.SetActive(true);
-
-		fullSequence?.Kill();
-		fullSequence = DOTween.Sequence();
-		fullSequence.Append(contentRoot.DOAnchorPos(originalPos, smoothDuration).SetEase(Ease.InOutQuad));
-		fullSequence.Join(canvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutQuad));
-
-		fullSequence.AppendInterval(showDelay);
-		fullSequence.Append(contentRoot.DOAnchorPosX(originalPos.x + 50f, fadeDuration).SetEase(Ease.InQuad));
-		fullSequence.Join(canvasGroup.DOFade(0f, fadeDuration).SetEase(Ease.InQuad));
-
-		fullSequence.OnComplete(() =>
+		protected override void OnAwake()
 		{
+			base.OnAwake();
+			canvasGroup.alpha = 0f;
+			text.gameObject.SetActive(false);
+		}
+
+		protected override void OnShow()
+		{
+			base.OnShow();
+			originalPos = contentRoot.anchoredPosition;
+			contentRoot.anchoredPosition = originalPos + Vector2.down * initialShift;
+			canvasGroup.alpha = 0f;
+			text.gameObject.SetActive(true);
+
+			if (animationRoutine != null)
+			{
+				StopCoroutine(animationRoutine);
+			}
+
+			animationRoutine = StartCoroutine(PlayAnimation());
+		}
+
+		protected override void OnHide()
+		{
+			if (animationRoutine != null)
+			{
+				StopCoroutine(animationRoutine);
+				animationRoutine = null;
+			}
+
+			base.OnHide();
+		}
+
+		private System.Collections.IEnumerator PlayAnimation()
+		{
+			yield return FadeAndMove(contentRoot.anchoredPosition, originalPos, 0f, 1f, smoothDuration);
+			yield return new WaitForSeconds(showDelay);
+			yield return FadeAndMove(contentRoot.anchoredPosition, new Vector2(originalPos.x + 50f, originalPos.y), 1f, 0f, fadeDuration);
+
 			text.gameObject.SetActive(false);
 			Showed?.Invoke(this);
 			base.OnHide();
-		});
-	}
+			animationRoutine = null;
+		}
 
-	protected override void OnHide()
-	{
-		fullSequence?.Kill();
-		base.OnHide();
+		private System.Collections.IEnumerator FadeAndMove(Vector2 fromPos, Vector2 toPos, float fromAlpha, float toAlpha, float duration)
+		{
+			if (duration <= 0f)
+			{
+				contentRoot.anchoredPosition = toPos;
+				canvasGroup.alpha = toAlpha;
+				yield break;
+			}
+
+			var elapsed = 0f;
+			while (elapsed < duration)
+			{
+				elapsed += Time.unscaledDeltaTime;
+				var t = Mathf.Clamp01(elapsed / duration);
+				contentRoot.anchoredPosition = Vector2.LerpUnclamped(fromPos, toPos, t);
+				canvasGroup.alpha = Mathf.LerpUnclamped(fromAlpha, toAlpha, t);
+				yield return null;
+			}
+		}
 	}
 }

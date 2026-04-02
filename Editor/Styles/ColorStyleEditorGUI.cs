@@ -1,4 +1,4 @@
-using _Main.Scripts.UI;
+using PlatformCore.Services.UI.Styles;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;

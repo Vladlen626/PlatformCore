@@ -14,6 +14,8 @@ namespace PlatformCore.Editor.Installer
 			new DependencyEntry("Cinemachine", "com.unity.cinemachine", DependencyType.Required),
 			new DependencyEntry("TextMesh Pro", "com.unity.textmeshpro", DependencyType.Required),
 			new DependencyEntry("Input System", "com.unity.inputsystem", DependencyType.Required),
+			new DependencyEntry("Newtonsoft Json", "com.unity.nuget.newtonsoft-json", DependencyType.Required),
+			new DependencyEntry("UniTask", "com.cysharp.unitask", DependencyType.Required),
 		};
 
 		private static readonly DependencyEntry[] OptionalDependencies =
@@ -51,7 +53,7 @@ namespace PlatformCore.Editor.Installer
 			EditorGUILayout.Space();
 
 			EditorGUILayout.LabelField("Manual / External Setup", EditorStyles.boldLabel);
-			EditorGUILayout.HelpBox("FMOD and PrimeTween are not auto-installed. Configure them manually if your project uses these integrations.", MessageType.Info);
+			EditorGUILayout.HelpBox("FMOD and DOTween are optional integrations and are not auto-installed. Configure them manually only if your project uses related features.", MessageType.Info);
 			EditorGUILayout.Space();
 
 			using (new EditorGUI.DisabledScope(_installing))

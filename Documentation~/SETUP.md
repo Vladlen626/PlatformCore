@@ -12,23 +12,27 @@ In consumer project `Packages/manifest.json`:
 }
 ```
 
-## 2. Run installer window
+## 2. Refresh packages
+
+Unity Package Manager will install declared dependencies automatically from `com.len.platformcore/package.json`.
+
+## 3. Run installer window (validation + helper install actions)
 
 Open `Tools/Len/PlatformCore/Installer`:
-- Install Required Dependencies
-- (Optional) Install Optional Dependencies
+- Install Required Dependencies (helper action for required UPM deps)
+- Install Optional Dependencies (FishNet)
 - Validate Setup
 
-## 3. Required dependencies
+## 4. Required dependencies (declared)
 - Cinemachine
 - TextMesh Pro
 - Input System
+- Newtonsoft Json
+- UniTask
 
-## 4. Optional dependencies
+## 5. Optional dependencies
 - FishNet (not mandatory; required only for networking sample/integration)
 
-## 5. Manual/external setup
-- FMOD
-- PrimeTween
-
-These are not auto-installed by this package and should be integrated manually when your project needs them.
+## 6. Manual/external integrations (optional)
+- FMOD (audio service falls back to no-op when FMOD is not installed)
+- DOTween (not required by base runtime)

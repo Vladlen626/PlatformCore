@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _Main.Scripts.UI
+namespace PlatformCore.Services.UI.Styles
 {
 	[Serializable]
 	public class ColorStyleEntry

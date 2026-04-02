@@ -1,6 +1,7 @@
 using PlatformCore.Services;
 using PlatformCore.Services.Audio;
 using PlatformCore.Services.Factory;
+using PlatformCore.Services.Notifications;
 using PlatformCore.Services.UI;
 
 namespace PlatformCore.Infrastructure.Notifications

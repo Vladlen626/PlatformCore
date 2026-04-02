@@ -1,24 +1,27 @@
 using PlatformCore.Services.UI;
 using UnityEngine;
 
-public class UINotificationsView : UIBaseElement
+namespace PlatformCore.Services.Notifications
 {
-	[SerializeField]
-	private Transform list;
-
-	public Transform List => list;
-
-	protected override void OnAwake()
+	public class UINotificationsView : UIBaseElement
 	{
-		base.OnAwake();
-		var rect = transform as RectTransform;
-		if (rect && rect.parent is RectTransform)
+		[SerializeField]
+		private Transform list;
+
+		public Transform List => list;
+
+		protected override void OnAwake()
 		{
-			rect.anchorMin = Vector2.zero;
-			rect.anchorMax = Vector2.one;
-			rect.offsetMin = Vector2.zero;
-			rect.offsetMax = Vector2.zero;
-			rect.pivot = new Vector2(0.5f, 0.5f);
+			base.OnAwake();
+			var rect = transform as RectTransform;
+			if (rect && rect.parent is RectTransform)
+			{
+				rect.anchorMin = Vector2.zero;
+				rect.anchorMax = Vector2.one;
+				rect.offsetMin = Vector2.zero;
+				rect.offsetMax = Vector2.zero;
+				rect.pivot = new Vector2(0.5f, 0.5f);
+			}
 		}
 	}
 }
