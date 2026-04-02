@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using PlatformCore.Services;
 using PlatformCore.Services.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityScene = UnityEngine.SceneManagement.Scene;
 
 namespace PlatformCore.Infrastructure
 {
@@ -11,7 +11,7 @@ namespace PlatformCore.Infrastructure
 	{
 		[SerializeField] private UIRuntimeContext _uiRuntimeContext;
 
-		public Scene Scene { get; private set; }
+		public UnityScene Scene { get; private set; }
 		public IReadOnlyList<UICanvasEntry> UICanvasEntries
 		{
 			get
