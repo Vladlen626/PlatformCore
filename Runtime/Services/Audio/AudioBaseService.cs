@@ -1,11 +1,12 @@
 #if FMOD_PRESENT
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using FMOD;
 using FMOD.Studio;
-using UnityEngine;
 using FMODUnity;
+using PlatformCore.Core;
+using UnityEngine;
 
 namespace PlatformCore.Services.Audio
 {
@@ -19,8 +20,8 @@ namespace PlatformCore.Services.Audio
 		private float _musicVolume = 0.5f;
 		private float _sfxVolume = 0.5f;
 		private bool _isMuted;
-		
-		private Dictionary<string, EventInstance> _eventInstances = new ();
+
+		private readonly Dictionary<string, EventInstance> _eventInstances = new();
 		private readonly HashSet<string> _prewarmedEvents = new(StringComparer.Ordinal);
 
 		public bool IsMuted => _isMuted;
@@ -98,10 +99,10 @@ namespace PlatformCore.Services.Audio
 
 				if (_currentMusic.isValid())
 				{
-					_currentMusic.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+					_currentMusic.stop(STOP_MODE.ALLOWFADEOUT);
 					_currentMusic.release();
 				}
-				
+
 				_currentMusic = RuntimeManager.CreateInstance(eventPath);
 				_currentMusic.start();
 
@@ -135,20 +136,22 @@ namespace PlatformCore.Services.Audio
 				return;
 			}
 
-			sound.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+			sound.stop(STOP_MODE.ALLOWFADEOUT);
 		}
 
 		public async UniTask StopMusicAsync(float fadeTime = 1f)
 		{
 			await UniTask.Yield();
-			if (!_currentMusic.isValid()) return;
+			if (!_currentMusic.isValid())
+			{
+				return;
+			}
 
 			_logger?.Log("[AudioService] Stopping music");
 
 			try
 			{
-				_currentMusic.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-
+				_currentMusic.stop(STOP_MODE.ALLOWFADEOUT);
 				_currentMusic.release();
 				_currentMusic = new EventInstance();
 			}
@@ -218,7 +221,7 @@ namespace PlatformCore.Services.Audio
 		{
 			try
 			{
-				float finalVolume = _isMuted ? 0f : _masterVolume;
+				var finalVolume = _isMuted ? 0f : _masterVolume;
 
 				var masterBus = RuntimeManager.GetBus(_options.MasterBusPath);
 				masterBus.setVolume(finalVolume);
@@ -239,7 +242,7 @@ namespace PlatformCore.Services.Audio
 		{
 			if (_currentMusic.isValid())
 			{
-				_currentMusic.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+				_currentMusic.stop(STOP_MODE.IMMEDIATE);
 				_currentMusic.release();
 			}
 
@@ -250,6 +253,7 @@ namespace PlatformCore.Services.Audio
 
 #else
 using Cysharp.Threading.Tasks;
+using PlatformCore.Core;
 using UnityEngine;
 
 namespace PlatformCore.Services.Audio
