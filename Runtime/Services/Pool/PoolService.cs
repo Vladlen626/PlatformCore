@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using PlatformCore.Core;
+using PlatformCore.Services.Factory;
 using UnityEngine;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;
-using PlatformCore.Services.Factory;
 
 namespace PlatformCore.Services.Pool
 {
@@ -76,7 +77,9 @@ namespace PlatformCore.Services.Pool
 			obj.transform.rotation = rotation;
 
 			if (parent != null)
+			{
 				obj.transform.SetParent(parent);
+			}
 
 			return obj;
 		}

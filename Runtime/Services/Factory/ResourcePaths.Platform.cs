@@ -10,7 +10,7 @@ namespace PlatformCore.Services.Factory
 		{
 			public static class Root
 			{
-				public const string DOTweenSettings = "DOTweenSettings";
+				public const string PrimeTweenSettings = "PrimeTweenSettings";
 			}
 
 			public static class UI

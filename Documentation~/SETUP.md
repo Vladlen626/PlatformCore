@@ -35,4 +35,4 @@ Open `Tools/Len/PlatformCore/Installer`:
 
 ## 6. Manual/external integrations (optional)
 - FMOD (audio service falls back to no-op when FMOD is not installed)
-- DOTween (not required by base runtime)
+- PrimeTween (not required by base runtime)

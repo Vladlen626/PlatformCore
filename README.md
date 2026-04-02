@@ -34,7 +34,7 @@ Reusable platform foundation for Unity projects.
 
 ### Manual/External integrations (not required for base package compile)
 - FMOD (audio integration is no-op when FMOD is absent).
-- DOTween (legacy tween integration removed from base runtime path).
+- PrimeTween (optional tween integration, manual setup in consumer project).
 
 ## Samples status
 

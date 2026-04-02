@@ -1,99 +1,99 @@
-# PlatformCore 2.0 — Module Split Spec
+﻿# PlatformCore 2.0 вЂ” Module Split Spec
 
-Версия документа: 1.2
-Статус: спецификация + sync с фактическим состоянием split (Core / Infrastructure / Editor сделаны, остальные слои пока логические)
-Назначение: использовать как guide для asmdef split и наведения порядка в зависимостях
-
----
-
-## 1. Цель и текущий статус
-
-Сейчас runtime-код находится в одном `PlatformCore.asmdef`.
-
-Это допустимо как промежуточное состояние после legacy import, но дальше это мешает:
-
-- изоляции Core;
-- валидации зависимостей;
-- чистому foundation API;
-- дальнейшему переносу settings/scene/UI;
-- локальному переписыванию отдельных подсистем.
-
-Цель этого документа:
-
-**разрезать текущий baseline на целевые модули 2.0 без big-bang rewrite.**
-
-Текущий статус: первичный split (`Core / Infrastructure / Editor`) выполнен. Отдельные asmdef для `UI/Audio/Settings/SceneManagement/Camera` пока не выделены физически и остаются логическими слоями внутри текущего runtime baseline. Документ используется как reference для boundary-polish без redesign.
+Р’РµСЂСЃРёСЏ РґРѕРєСѓРјРµРЅС‚Р°: 1.2
+РЎС‚Р°С‚СѓСЃ: СЃРїРµС†РёС„РёРєР°С†РёСЏ + sync СЃ С„Р°РєС‚РёС‡РµСЃРєРёРј СЃРѕСЃС‚РѕСЏРЅРёРµРј split (Core / Infrastructure / Editor СЃРґРµР»Р°РЅС‹, РѕСЃС‚Р°Р»СЊРЅС‹Рµ СЃР»РѕРё РїРѕРєР° Р»РѕРіРёС‡РµСЃРєРёРµ)
+РќР°Р·РЅР°С‡РµРЅРёРµ: РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РєР°Рє guide РґР»СЏ asmdef split Рё РЅР°РІРµРґРµРЅРёСЏ РїРѕСЂСЏРґРєР° РІ Р·Р°РІРёСЃРёРјРѕСЃС‚СЏС…
 
 ---
 
-## 2. Главные правила split
+## 1. Р¦РµР»СЊ Рё С‚РµРєСѓС‰РёР№ СЃС‚Р°С‚СѓСЃ
 
-### 2.1 Split не равен rewrite
+РЎРµР№С‡Р°СЃ runtime-РєРѕРґ РЅР°С…РѕРґРёС‚СЃСЏ РІ РѕРґРЅРѕРј `PlatformCore.asmdef`.
 
-Разделение сборок не должно сопровождаться одновременной полной переработкой логики.
+Р­С‚Рѕ РґРѕРїСѓСЃС‚РёРјРѕ РєР°Рє РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РїРѕСЃР»Рµ legacy import, РЅРѕ РґР°Р»СЊС€Рµ СЌС‚Рѕ РјРµС€Р°РµС‚:
 
-Сначала:
+- РёР·РѕР»СЏС†РёРё Core;
+- РІР°Р»РёРґР°С†РёРё Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№;
+- С‡РёСЃС‚РѕРјСѓ foundation API;
+- РґР°Р»СЊРЅРµР№С€РµРјСѓ РїРµСЂРµРЅРѕСЃСѓ settings/scene/UI;
+- Р»РѕРєР°Р»СЊРЅРѕРјСѓ РїРµСЂРµРїРёСЃС‹РІР°РЅРёСЋ РѕС‚РґРµР»СЊРЅС‹С… РїРѕРґСЃРёСЃС‚РµРј.
 
-- физически отделяем слои;
-- выравниваем ссылки;
-- убираем лишние зависимости.
+Р¦РµР»СЊ СЌС‚РѕРіРѕ РґРѕРєСѓРјРµРЅС‚Р°:
 
-Потом:
+**СЂР°Р·СЂРµР·Р°С‚СЊ С‚РµРєСѓС‰РёР№ baseline РЅР° С†РµР»РµРІС‹Рµ РјРѕРґСѓР»Рё 2.0 Р±РµР· big-bang rewrite.**
 
-- переписываем проблемные реализации локально.
+РўРµРєСѓС‰РёР№ СЃС‚Р°С‚СѓСЃ: РїРµСЂРІРёС‡РЅС‹Р№ split (`Core / Infrastructure / Editor`) РІС‹РїРѕР»РЅРµРЅ. РћС‚РґРµР»СЊРЅС‹Рµ asmdef РґР»СЏ `UI/Audio/Settings/SceneManagement/Camera` РїРѕРєР° РЅРµ РІС‹РґРµР»РµРЅС‹ С„РёР·РёС‡РµСЃРєРё Рё РѕСЃС‚Р°СЋС‚СЃСЏ Р»РѕРіРёС‡РµСЃРєРёРјРё СЃР»РѕСЏРјРё РІРЅСѓС‚СЂРё С‚РµРєСѓС‰РµРіРѕ runtime baseline. Р”РѕРєСѓРјРµРЅС‚ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РєР°Рє reference РґР»СЏ boundary-polish Р±РµР· redesign.
 
-### 2.2 Core должен быть максимально лёгким
+---
 
-В `PlatformCore.Core` не должны жить прямые зависимости на:
+## 2. Р“Р»Р°РІРЅС‹Рµ РїСЂР°РІРёР»Р° split
+
+### 2.1 Split РЅРµ СЂР°РІРµРЅ rewrite
+
+Р Р°Р·РґРµР»РµРЅРёРµ СЃР±РѕСЂРѕРє РЅРµ РґРѕР»Р¶РЅРѕ СЃРѕРїСЂРѕРІРѕР¶РґР°С‚СЊСЃСЏ РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕР№ РїРѕР»РЅРѕР№ РїРµСЂРµСЂР°Р±РѕС‚РєРѕР№ Р»РѕРіРёРєРё.
+
+РЎРЅР°С‡Р°Р»Р°:
+
+- С„РёР·РёС‡РµСЃРєРё РѕС‚РґРµР»СЏРµРј СЃР»РѕРё;
+- РІС‹СЂР°РІРЅРёРІР°РµРј СЃСЃС‹Р»РєРё;
+- СѓР±РёСЂР°РµРј Р»РёС€РЅРёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё.
+
+РџРѕС‚РѕРј:
+
+- РїРµСЂРµРїРёСЃС‹РІР°РµРј РїСЂРѕР±Р»РµРјРЅС‹Рµ СЂРµР°Р»РёР·Р°С†РёРё Р»РѕРєР°Р»СЊРЅРѕ.
+
+### 2.2 Core РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РјР°РєСЃРёРјР°Р»СЊРЅРѕ Р»С‘РіРєРёРј
+
+Р’ `PlatformCore.Core` РЅРµ РґРѕР»Р¶РЅС‹ Р¶РёС‚СЊ РїСЂСЏРјС‹Рµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РЅР°:
 
 - FMOD;
 - Cinemachine;
 - TMPro;
-- DOTween;
+- PrimeTween;
 - Splines;
 - editor API;
 - sample assets.
 
-### 2.3 Infrastructure зависит на Core, но не наоборот
+### 2.3 Infrastructure Р·Р°РІРёСЃРёС‚ РЅР° Core, РЅРѕ РЅРµ РЅР°РѕР±РѕСЂРѕС‚
 
-`Infrastructure` может зависеть от `Core`.
-`Core` не должен зависеть от `Infrastructure`.
+`Infrastructure` РјРѕР¶РµС‚ Р·Р°РІРёСЃРµС‚СЊ РѕС‚ `Core`.
+`Core` РЅРµ РґРѕР»Р¶РµРЅ Р·Р°РІРёСЃРµС‚СЊ РѕС‚ `Infrastructure`.
 
-### 2.4 UI / Audio / Camera / Settings / SceneManagement должны быть отдельными слоями
+### 2.4 UI / Audio / Camera / Settings / SceneManagement РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РѕС‚РґРµР»СЊРЅС‹РјРё СЃР»РѕСЏРјРё
 
-Они не должны оставаться «папками внутри одного runtime asmdef».
+РћРЅРё РЅРµ РґРѕР»Р¶РЅС‹ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ В«РїР°РїРєР°РјРё РІРЅСѓС‚СЂРё РѕРґРЅРѕРіРѕ runtime asmdefВ».
 
-### 2.5 Editor и Samples всегда отдельно
+### 2.5 Editor Рё Samples РІСЃРµРіРґР° РѕС‚РґРµР»СЊРЅРѕ
 
-- `PlatformCore.Editor` не должен смешиваться с runtime;
-- `PlatformCore.Samples` не должен загрязнять foundation.
+- `PlatformCore.Editor` РЅРµ РґРѕР»Р¶РµРЅ СЃРјРµС€РёРІР°С‚СЊСЃСЏ СЃ runtime;
+- `PlatformCore.Samples` РЅРµ РґРѕР»Р¶РµРЅ Р·Р°РіСЂСЏР·РЅСЏС‚СЊ foundation.
 
-### 2.6 Localization вне scope PlatformCore
+### 2.6 Localization РІРЅРµ scope PlatformCore
 
 - Localization intentionally stays outside PlatformCore foundation scope.
-- Platform runtime модули не должны требовать `ILocalizationService`/localization registration для базовой работы.
-- Global in-app notifications остаются platform-level слоем и работают на raw message data.
+- Platform runtime РјРѕРґСѓР»Рё РЅРµ РґРѕР»Р¶РЅС‹ С‚СЂРµР±РѕРІР°С‚СЊ `ILocalizationService`/localization registration РґР»СЏ Р±Р°Р·РѕРІРѕР№ СЂР°Р±РѕС‚С‹.
+- Global in-app notifications РѕСЃС‚Р°СЋС‚СЃСЏ platform-level СЃР»РѕРµРј Рё СЂР°Р±РѕС‚Р°СЋС‚ РЅР° raw message data.
 
 ---
 
-## 3. Целевые модули
+## 3. Р¦РµР»РµРІС‹Рµ РјРѕРґСѓР»Рё
 
 ## 3.1 PlatformCore.Core
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
-Минимальные runtime contracts и composition base.
+РњРёРЅРёРјР°Р»СЊРЅС‹Рµ runtime contracts Рё composition base.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `IBaseController`
 - lifecycle-related interfaces
 - `Composite`
 - `Installer`
 - composition utility types
-- возможно минимальные service contracts без внешних vendor-dependencies
+- РІРѕР·РјРѕР¶РЅРѕ РјРёРЅРёРјР°Р»СЊРЅС‹Рµ service contracts Р±РµР· РІРЅРµС€РЅРёС… vendor-dependencies
 
-### Что не должно лежать здесь
+### Р§С‚Рѕ РЅРµ РґРѕР»Р¶РЅРѕ Р»РµР¶Р°С‚СЊ Р·РґРµСЃСЊ
 
 - `LifecycleService`
 - `BaseBootstrap`
@@ -108,119 +108,119 @@
 
 ## 3.2 PlatformCore.Infrastructure
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Application/bootstrap/runtime orchestration.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `ApplicationLifetimeService`
 - `BaseBootstrap`
 - `BaseGameRoot`
 - `PersistentSceneContext`
 - `LifecycleService`
-- возможно service registration / locator infrastructure
+- РІРѕР·РјРѕР¶РЅРѕ service registration / locator infrastructure
 
-### Зависимости
+### Р—Р°РІРёСЃРёРјРѕСЃС‚Рё
 
-- зависит от `PlatformCore.Core`
+- Р·Р°РІРёСЃРёС‚ РѕС‚ `PlatformCore.Core`
 
 ---
 
 ## 3.3 PlatformCore.UI
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Platform-level UI foundation.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `BaseContextController<T>`
 - `IUIService`
 - `UIBaseElement`
 - UI service base
 - layers / cursor / helpers
-- позже global notifications
+- РїРѕР·Р¶Рµ global notifications
 
-### Особое правило
+### РћСЃРѕР±РѕРµ РїСЂР°РІРёР»Рѕ
 
-Runtime UI и editor style tooling должны быть разведены.
+Runtime UI Рё editor style tooling РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°Р·РІРµРґРµРЅС‹.
 
 ---
 
 ## 3.4 PlatformCore.Audio
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
-Platform audio API и его реализация.
+Platform audio API Рё РµРіРѕ СЂРµР°Р»РёР·Р°С†РёСЏ.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `IAudioService`
 - `AudioBaseService`
 - audio settings bridge later
 
-### Особое правило
+### РћСЃРѕР±РѕРµ РїСЂР°РІРёР»Рѕ
 
-Если FMOD остаётся текущей реализацией, это должно быть явно видно на уровне module ownership и зависимостей.
+Р•СЃР»Рё FMOD РѕСЃС‚Р°С‘С‚СЃСЏ С‚РµРєСѓС‰РµР№ СЂРµР°Р»РёР·Р°С†РёРµР№, СЌС‚Рѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ СЏРІРЅРѕ РІРёРґРЅРѕ РЅР° СѓСЂРѕРІРЅРµ module ownership Рё Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№.
 
 ---
 
 ## 3.5 PlatformCore.Settings
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Settings model, persistence, notifications, appliers.
 
-### Кандидаты
+### РљР°РЅРґРёРґР°С‚С‹
 
-- пока модуль создаётся позже, после split foundation
+- РїРѕРєР° РјРѕРґСѓР»СЊ СЃРѕР·РґР°С‘С‚СЃСЏ РїРѕР·Р¶Рµ, РїРѕСЃР»Рµ split foundation
 
 ---
 
 ## 3.6 PlatformCore.SceneManagement
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Scene loading, loading flow, persistent/gameplay scene orchestration.
 
-### Кандидаты
+### РљР°РЅРґРёРґР°С‚С‹
 
 - `PersistentSceneContext`
 - scene loader/services later
 
-### Примечание
+### РџСЂРёРјРµС‡Р°РЅРёРµ
 
-На transitional step `PersistentSceneContext` может временно оставаться в Infrastructure, пока не оформлен полноценный scene module.
+РќР° transitional step `PersistentSceneContext` РјРѕР¶РµС‚ РІСЂРµРјРµРЅРЅРѕ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ РІ Infrastructure, РїРѕРєР° РЅРµ РѕС„РѕСЂРјР»РµРЅ РїРѕР»РЅРѕС†РµРЅРЅС‹Р№ scene module.
 
 ---
 
 ## 3.7 PlatformCore.Camera
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Reusable camera foundation.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `ICameraService`
 - `ICameraShakeService`
 - `CameraService` / `PlayerCameraService`
 - `CinemachineCameraRegister`
 
-### Особое правило
+### РћСЃРѕР±РѕРµ РїСЂР°РІРёР»Рѕ
 
-Игровые camera states не должны оставаться foundation contract.
+РРіСЂРѕРІС‹Рµ camera states РЅРµ РґРѕР»Р¶РЅС‹ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ foundation contract.
 
 ---
 
 ## 3.8 PlatformCore.Editor
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
 Editor tooling only.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - `PlatformCore.Editor.asmdef`
 - style editors
@@ -231,26 +231,26 @@ Editor tooling only.
 
 ## 3.9 PlatformCore.Samples
 
-### Ответственность
+### РћС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊ
 
-Sample/demo assets и демонстрационные runtime parts.
+Sample/demo assets Рё РґРµРјРѕРЅСЃС‚СЂР°С†РёРѕРЅРЅС‹Рµ runtime parts.
 
-### Кандидаты на перенос
+### РљР°РЅРґРёРґР°С‚С‹ РЅР° РїРµСЂРµРЅРѕСЃ
 
 - placeholder materials
 - texture packs
 - demo resources
-- проектные примеры, если они останутся
+- РїСЂРѕРµРєС‚РЅС‹Рµ РїСЂРёРјРµСЂС‹, РµСЃР»Рё РѕРЅРё РѕСЃС‚Р°РЅСѓС‚СЃСЏ
 
 ---
 
-## 4. Желаемая карта зависимостей
+## 4. Р–РµР»Р°РµРјР°СЏ РєР°СЂС‚Р° Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№
 
 ```text
 PlatformCore.Core
-  ↑
+  в†‘
 PlatformCore.Infrastructure
-  ↑
+  в†‘
 PlatformCore.Settings
 PlatformCore.SceneManagement
 PlatformCore.UI
@@ -267,59 +267,60 @@ PlatformCore.Editor
   depends on runtime modules as needed
 
 PlatformCore.Samples
-  depends on runtime modules, never наоборот
+  depends on runtime modules, never РЅР°РѕР±РѕСЂРѕС‚
 ```
 
-### Правило
+### РџСЂР°РІРёР»Рѕ
 
-Основание графа — `Core`, а не UI/Audio/Camera.
-
----
-
-## 5. Практический порядок split
-
-### Шаг 1. Выделить Core — выполнен
-
-Сначала вынести минимальные контракты и базовые interfaces.
-
-### Шаг 2. Выделить Infrastructure — выполнен
-
-Перенести bootstrap и lifecycle foundation.
-
-### Шаг 3. Оставить Editor отдельным — выполнен
-
-Проверить, что editor tooling не сидит в runtime tree без необходимости.
-
-### Шаг 4. Подготовить UI / Audio / Camera boundaries — выполнен на уровне foundation normalization
-
-Пока можно не делать идеальный cleanup реализации, но физически отделить ownership слоёв.
-
-### Шаг 5. Отдельно оформить Settings и SceneManagement — выполнен
-
-Не раньше, чем Foundation split уже устойчив.
+РћСЃРЅРѕРІР°РЅРёРµ РіСЂР°С„Р° вЂ” `Core`, Р° РЅРµ UI/Audio/Camera.
 
 ---
 
-## 6. Что нельзя делать во время split
+## 5. РџСЂР°РєС‚РёС‡РµСЃРєРёР№ РїРѕСЂСЏРґРѕРє split
 
-Нельзя:
+### РЁР°Рі 1. Р’С‹РґРµР»РёС‚СЊ Core вЂ” РІС‹РїРѕР»РЅРµРЅ
 
-- одновременно делать полный rewrite lifecycle;
-- одновременно придумывать новый UI framework;
-- тащить gameplay systems;
-- оставлять game-specific enums и resource paths как foundation contracts;
-- превращать asmdef split в многонедельный rename-driven refactor.
+РЎРЅР°С‡Р°Р»Р° РІС‹РЅРµСЃС‚Рё РјРёРЅРёРјР°Р»СЊРЅС‹Рµ РєРѕРЅС‚СЂР°РєС‚С‹ Рё Р±Р°Р·РѕРІС‹Рµ interfaces.
+
+### РЁР°Рі 2. Р’С‹РґРµР»РёС‚СЊ Infrastructure вЂ” РІС‹РїРѕР»РЅРµРЅ
+
+РџРµСЂРµРЅРµСЃС‚Рё bootstrap Рё lifecycle foundation.
+
+### РЁР°Рі 3. РћСЃС‚Р°РІРёС‚СЊ Editor РѕС‚РґРµР»СЊРЅС‹Рј вЂ” РІС‹РїРѕР»РЅРµРЅ
+
+РџСЂРѕРІРµСЂРёС‚СЊ, С‡С‚Рѕ editor tooling РЅРµ СЃРёРґРёС‚ РІ runtime tree Р±РµР· РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
+
+### РЁР°Рі 4. РџРѕРґРіРѕС‚РѕРІРёС‚СЊ UI / Audio / Camera boundaries вЂ” РІС‹РїРѕР»РЅРµРЅ РЅР° СѓСЂРѕРІРЅРµ foundation normalization
+
+РџРѕРєР° РјРѕР¶РЅРѕ РЅРµ РґРµР»Р°С‚СЊ РёРґРµР°Р»СЊРЅС‹Р№ cleanup СЂРµР°Р»РёР·Р°С†РёРё, РЅРѕ С„РёР·РёС‡РµСЃРєРё РѕС‚РґРµР»РёС‚СЊ ownership СЃР»РѕС‘РІ.
+
+### РЁР°Рі 5. РћС‚РґРµР»СЊРЅРѕ РѕС„РѕСЂРјРёС‚СЊ Settings Рё SceneManagement вЂ” РІС‹РїРѕР»РЅРµРЅ
+
+РќРµ СЂР°РЅСЊС€Рµ, С‡РµРј Foundation split СѓР¶Рµ СѓСЃС‚РѕР№С‡РёРІ.
+
+---
+
+## 6. Р§С‚Рѕ РЅРµР»СЊР·СЏ РґРµР»Р°С‚СЊ РІРѕ РІСЂРµРјСЏ split
+
+РќРµР»СЊР·СЏ:
+
+- РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ РґРµР»Р°С‚СЊ РїРѕР»РЅС‹Р№ rewrite lifecycle;
+- РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ РїСЂРёРґСѓРјС‹РІР°С‚СЊ РЅРѕРІС‹Р№ UI framework;
+- С‚Р°С‰РёС‚СЊ gameplay systems;
+- РѕСЃС‚Р°РІР»СЏС‚СЊ game-specific enums Рё resource paths РєР°Рє foundation contracts;
+- РїСЂРµРІСЂР°С‰Р°С‚СЊ asmdef split РІ РјРЅРѕРіРѕРЅРµРґРµР»СЊРЅС‹Р№ rename-driven refactor.
 
 ---
 
 ## 7. Acceptance Criteria
 
-Module split считается успешным, если:
+Module split СЃС‡РёС‚Р°РµС‚СЃСЏ СѓСЃРїРµС€РЅС‹Рј, РµСЃР»Рё:
 
-- `Core` больше не тянет vendor/runtime-specific пакеты;
-- `Infrastructure` отделён от UI/audio/camera;
-- `Editor` физически отделён от runtime;
-- `Samples` не живут в foundation runtime tree как обязательная часть платформы;
-- следующий PR можно делать уже на уровне отдельного модуля, а не на уровне всего монолита.
+- `Core` Р±РѕР»СЊС€Рµ РЅРµ С‚СЏРЅРµС‚ vendor/runtime-specific РїР°РєРµС‚С‹;
+- `Infrastructure` РѕС‚РґРµР»С‘РЅ РѕС‚ UI/audio/camera;
+- `Editor` С„РёР·РёС‡РµСЃРєРё РѕС‚РґРµР»С‘РЅ РѕС‚ runtime;
+- `Samples` РЅРµ Р¶РёРІСѓС‚ РІ foundation runtime tree РєР°Рє РѕР±СЏР·Р°С‚РµР»СЊРЅР°СЏ С‡Р°СЃС‚СЊ РїР»Р°С‚С„РѕСЂРјС‹;
+- СЃР»РµРґСѓСЋС‰РёР№ PR РјРѕР¶РЅРѕ РґРµР»Р°С‚СЊ СѓР¶Рµ РЅР° СѓСЂРѕРІРЅРµ РѕС‚РґРµР»СЊРЅРѕРіРѕ РјРѕРґСѓР»СЏ, Р° РЅРµ РЅР° СѓСЂРѕРІРЅРµ РІСЃРµРіРѕ РјРѕРЅРѕР»РёС‚Р°.
 
-Текущий статус: **критерии выполнены для foundation-phase**.
+РўРµРєСѓС‰РёР№ СЃС‚Р°С‚СѓСЃ: **РєСЂРёС‚РµСЂРёРё РІС‹РїРѕР»РЅРµРЅС‹ РґР»СЏ foundation-phase**.
+

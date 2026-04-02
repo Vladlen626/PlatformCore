@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using PlatformCore.Core;
 using UnityEngine;
 
 namespace PlatformCore.Services.UI
@@ -96,11 +97,9 @@ namespace PlatformCore.Services.UI
 			{
 				return false;
 			}
-			else
-			{
-				lockCount--;
-				return lockCount == 0;
-			}
+
+			lockCount--;
+			return lockCount == 0;
 		}
 
 		private string GetCaller()

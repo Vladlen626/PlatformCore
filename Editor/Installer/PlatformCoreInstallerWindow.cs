@@ -25,6 +25,7 @@ namespace PlatformCore.Editor.Installer
 
 		private ListRequest _listRequest;
 		private AddRequest _addRequest;
+		private string _currentAddPackageId;
 		private readonly Queue<DependencyEntry> _queue = new Queue<DependencyEntry>();
 		private readonly Dictionary<string, string> _statuses = new Dictionary<string, string>();
 		private bool _installing;
@@ -53,7 +54,7 @@ namespace PlatformCore.Editor.Installer
 			EditorGUILayout.Space();
 
 			EditorGUILayout.LabelField("Manual / External Setup", EditorStyles.boldLabel);
-			EditorGUILayout.HelpBox("FMOD and DOTween are optional integrations and are not auto-installed. Configure them manually only if your project uses related features.", MessageType.Info);
+			EditorGUILayout.HelpBox("FMOD and PrimeTween are optional integrations and are not auto-installed. Configure them manually only if your project uses related features.", MessageType.Info);
 			EditorGUILayout.Space();
 
 			using (new EditorGUI.DisabledScope(_installing))
@@ -144,6 +145,7 @@ namespace PlatformCore.Editor.Installer
 			var entry = _queue.Dequeue();
 			_installing = true;
 			_statuses[entry.PackageId] = "Installing...";
+			_currentAddPackageId = entry.PackageId;
 			_addRequest = Client.Add(entry.PackageId);
 		}
 
@@ -172,12 +174,13 @@ namespace PlatformCore.Editor.Installer
 				}
 				else
 				{
-					var packageId = _addRequest.PackageIdOrName;
+					var packageId = string.IsNullOrWhiteSpace(_currentAddPackageId) ? "unknown" : _currentAddPackageId;
 					_statuses[packageId] = $"Failed: {_addRequest.Error?.message}";
 					Debug.LogWarning($"[PlatformCoreInstaller] Install failed for {packageId}: {_addRequest.Error?.message}");
 				}
 
 				_addRequest = null;
+				_currentAddPackageId = null;
 				RefreshPackages();
 				TryInstallNext();
 				Repaint();

@@ -63,7 +63,7 @@ namespace PlatformCore.Services.Factory
 		{
 			public const string ComboUpgradesConfig = Sample.Root.ComboUpgradesConfig;
 			public const string DiceScoringConfig = Sample.Root.DiceScoringConfig;
-			public const string DOTweenSettings = Platform.Root.DOTweenSettings;
+			public const string PrimeTweenSettings = Platform.Root.PrimeTweenSettings;
 		}
 
 		[System.Obsolete("Use ResourcePaths.Sample.Shop for game-specific resources.")]

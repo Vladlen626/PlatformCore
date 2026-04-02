@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using PlatformCore.Core;
 using PlatformCore.Services;
-using UnityEngine;
 using PlatformCore.Services.Factory;
+using UnityEngine;
 
 public class ConfigService : IService
 {
 	private readonly IResourceService _resourceService;
 	private readonly ILoggerService _loggerService;
 
-	// список для сохранения порядка JSON
 	private readonly Dictionary<System.Type, List<IConfig>> _configsList = new();
 
 	public ConfigService(IResourceService resourceService, ILoggerService loggerService)
@@ -56,16 +56,19 @@ public class ConfigService : IService
 		return dict;
 	}
 
-
 	public async UniTask<T> GetFirstOrDefaultAsync<T>(string resourcePath) where T : IConfig
 	{
 		var type = typeof(T);
 
 		if (!_configsList.ContainsKey(type))
+		{
 			await GetConfigsAsync<T>(resourcePath);
+		}
 
 		if (_configsList[type].Count == 0)
+		{
 			return default;
+		}
 
 		return (T)_configsList[type][0];
 	}
