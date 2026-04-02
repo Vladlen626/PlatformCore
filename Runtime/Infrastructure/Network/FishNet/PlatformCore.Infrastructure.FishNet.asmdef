@@ -1,0 +1,24 @@
+{
+  "name": "PlatformCore.Infrastructure.FishNet",
+  "references": [
+    "PlatformCore.Infrastructure",
+    "FishNet.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "LEN_PLATFORMCORE_HAS_FISHNET"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.firstgeargames.fishnet",
+      "expression": "0.0.0",
+      "define": "LEN_PLATFORMCORE_HAS_FISHNET"
+    }
+  ],
+  "noEngineReferences": false
+}
