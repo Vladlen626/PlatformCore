@@ -4,6 +4,7 @@
     "UniTask",
     "Unity.TextMeshPro",
     "Unity.Cinemachine",
+    "PrimeTween.Runtime",
     "PlatformCore.Core",
     "Newtonsoft.Json"
   ]
