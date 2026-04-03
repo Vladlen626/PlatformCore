@@ -40,13 +40,23 @@ namespace PlatformCore.Services
 
 		protected override async UniTask OnPreInitializeAsync(CancellationToken ct)
 		{
-			brain = Camera.main.GetComponent<CinemachineBrain>();
+			var mainCamera = Camera.main;
+			if (mainCamera)
+			{
+				brain = mainCamera.GetComponent<CinemachineBrain>();
+			}
 
-			var _camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Sample.Player.CinemachineCamera,
+			var camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Sample.Player.CinemachineCamera,
 				Vector3.zero, Quaternion.identity, _cameraParent);
-			_noise = (CinemachineBasicMultiChannelPerlin)_camera.GetCinemachineComponent(CinemachineCore.Stage.Noise);
-			_camera.name = PlayerCamera;
-			allCameras.Add(CameraIds.Primary, _camera);
+			if (!camera)
+			{
+				Debug.LogError("[CameraService] Failed to create primary camera.");
+				return;
+			}
+
+			_noise = (CinemachineBasicMultiChannelPerlin)camera.GetCinemachineComponent(CinemachineCore.Stage.Noise);
+			camera.name = PlayerCamera;
+			allCameras.Add(CameraIds.Primary, camera);
 
 			SetActiveCamera(CameraIds.Primary);
 		}
@@ -74,7 +84,7 @@ namespace PlatformCore.Services
 				return;
 			}
 
-			if (_camera == null || target == null)
+			if (!_camera || !target)
 			{
 				return;
 			}
@@ -89,13 +99,13 @@ namespace PlatformCore.Services
 		
 		public async UniTask SetActiveCameraAsync(string cameraId, CancellationToken ct = default)
 		{
-			if (allCameras == null || !allCameras.ContainsKey(cameraId))
+			if (!allCameras.TryGetValue(cameraId, out _))
 			{
 				Debug.LogWarning($"Camera {cameraId} not found!");
 				return;
 			}
 			
-			if (brain == null)
+			if (!brain)
 			{
 				Debug.LogWarning("No CinemachineBrain found on main camera!");
 				SetActiveCamera(cameraId);
@@ -109,25 +119,25 @@ namespace PlatformCore.Services
 
 		public void SetActiveCamera(string cameraId)
 		{
-			if (allCameras == null || !allCameras.ContainsKey(cameraId))
+			if (!allCameras.TryGetValue(cameraId, out var nextCamera))
 			{
 				Debug.LogWarning($"Camera {cameraId} not found!");
 				return;
 			}
 
-			if (currentCamera == allCameras[cameraId] && ActiveCameraId == cameraId)
+			if (currentCamera == nextCamera && ActiveCameraId == cameraId)
 			{
 				return;
 			}
 
 			StopShake();
 
-			if (currentCamera != null)
+			if (currentCamera)
 			{
 				currentCamera.gameObject.SetActive(false);
 			}
 
-			currentCamera = allCameras[cameraId];
+			currentCamera = nextCamera;
 			currentCamera.gameObject.SetActive(true);
 			ActiveCameraId = cameraId;
 			ActiveCameraChanged?.Invoke(cameraId);
@@ -139,7 +149,7 @@ namespace PlatformCore.Services
 
 		public void AddCamera(string cameraId, CinemachineCamera camera)
 		{
-			if (string.IsNullOrWhiteSpace(cameraId) || camera == null || allCameras.ContainsKey(cameraId))
+			if (string.IsNullOrWhiteSpace(cameraId) || !camera || allCameras.ContainsKey(cameraId))
 			{
 				return;
 			}
@@ -156,7 +166,7 @@ namespace PlatformCore.Services
 
 		public void SetFOV(float fov)
 		{
-			if (currentCamera != null)
+			if (currentCamera)
 			{
 				currentCamera.Lens.FieldOfView = fov;
 			}
@@ -164,18 +174,30 @@ namespace PlatformCore.Services
 
 		public float GetFOV()
 		{
-			return currentCamera != null ? currentCamera.Lens.FieldOfView : 60f;
+			if (!currentCamera)
+			{
+				return 60f;
+			}
+
+			return currentCamera.Lens.FieldOfView;
 		}
 
 		public void SetDutch(float degrees)
 		{
-			if (currentCamera != null)
+			if (currentCamera)
+			{
 				currentCamera.Lens.Dutch = degrees;
+			}
 		}
 
 		public float GetDutch()
 		{
-			return currentCamera != null ? currentCamera.Lens.Dutch : 0f;
+			if (!currentCamera)
+			{
+				return 0f;
+			}
+
+			return currentCamera.Lens.Dutch;
 		}
 
 
@@ -183,7 +205,7 @@ namespace PlatformCore.Services
 		public async UniTask ShakeAsync(float intensity, float duration)
 		{
 			var noise = _noise;
-			if (noise == null || IsShaking)
+			if (!noise || IsShaking)
 			{
 				return;
 			}
@@ -238,7 +260,7 @@ namespace PlatformCore.Services
 
 		private static void ResetNoise(CinemachineBasicMultiChannelPerlin noise)
 		{
-			if (noise == null)
+			if (!noise)
 			{
 				return;
 			}

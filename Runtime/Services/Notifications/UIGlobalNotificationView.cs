@@ -81,14 +81,16 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!backgroundImage)
 			{
-				throw new System.InvalidOperationException("Global notification background image is not assigned.");
+				Debug.LogError("[UIGlobalNotificationView] Background image is not assigned.");
+				return;
 			}
 
 			var style = isNegative ? negativeColor : positiveColor;
 			if (string.IsNullOrWhiteSpace(style.Id))
 			{
 				var tone = isNegative ? "Negative" : "Positive";
-				throw new System.InvalidOperationException($"{tone} global notification color style is not assigned.");
+				Debug.LogError($"[UIGlobalNotificationView] {tone} color style is not assigned.");
+				return;
 			}
 
 			backgroundImage.color = style.Value;

@@ -69,14 +69,9 @@ namespace PlatformCore.Services.UI
 		public T Show<T>() where T : UIBaseElement
 		{
 			var type = typeof(T);
-			if (!_windows.TryGetValue(type, out var window))
+			if (!_windows.TryGetValue(type, out var window) || !window)
 			{
 				_logger?.LogError($"[UIService] Please preload before show: {type.Name}");
-			}
-
-			if (window == null)
-			{
-				_logger?.LogError($"[UIService] Failed to show: {type.Name}");
 				return null;
 			}
 
@@ -87,7 +82,13 @@ namespace PlatformCore.Services.UI
 
 		public T GetWindow<T>() where T : UIBaseElement
 		{
-			return Show<T>();
+			var type = typeof(T);
+			if (!_windows.TryGetValue(type, out var window) || !window)
+			{
+				return null;
+			}
+
+			return (T)window;
 		}
 
 		public bool IsShowed<T>() where T : UIBaseElement
@@ -141,14 +142,14 @@ namespace PlatformCore.Services.UI
 			_logger?.Log($"[UIService] Loading window: {path}");
 
 			var prefab = await _resources.LoadAsync<GameObject>(path);
-			if (prefab == null)
+			if (!prefab)
 			{
 				_logger?.LogError($"[UIService] Missing prefab: {path}");
 				return null;
 			}
 
 			var prefabComponent = prefab.GetComponent<T>();
-			if (prefabComponent == null)
+			if (!prefabComponent)
 			{
 				_logger?.LogError($"[UIService] Missing component {type.Name} on prefab");
 				return null;
@@ -178,7 +179,7 @@ namespace PlatformCore.Services.UI
 			var instance = Object.Instantiate(prefab, target);
 			var component = instance.GetComponent<T>();
 
-			if (component == null)
+			if (!component)
 			{
 				Object.Destroy(instance);
 				_logger?.LogError($"[UIService] Component lost after instantiate: {type.Name}");

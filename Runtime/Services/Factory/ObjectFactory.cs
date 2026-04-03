@@ -27,7 +27,7 @@ namespace PlatformCore.Services.Factory
 
 			if (!prefab)
 			{
-				_loggerService?.LogError($"[ObjectFactory] ❌ Failed to load prefab at '{address}' (type: GameObject)");
+				_loggerService?.LogError($"[ObjectFactory] Failed to load prefab at '{address}' (type: GameObject)");
 				return null;
 			}
 
@@ -36,7 +36,7 @@ namespace PlatformCore.Services.Factory
 				: Object.Instantiate(prefab, position, rotation);
 
 			instance.name = prefab.name;
-			_loggerService?.Log($"[ObjectFactory] ✅ Created GameObject '{instance.name}' at {position}");
+			_loggerService?.Log($"[ObjectFactory] Created GameObject '{instance.name}' at {position}");
 			return instance;
 		}
 
@@ -48,19 +48,19 @@ namespace PlatformCore.Services.Factory
 			var gameObject = await CreateAsync(address, position, rotation, parent);
 			if (!gameObject)
 			{
-				_loggerService?.LogError($"[ObjectFactory] ❌ Prefab not found for '{typeof(T).Name}' at '{address}'");
+				_loggerService?.LogError($"[ObjectFactory] Prefab not found for '{typeof(T).Name}' at '{address}'");
 				return null;
 			}
 
 			var component = gameObject.GetComponent<T>();
 			if (!component)
 			{
-				_loggerService?.LogError($"[ObjectFactory] ❌ Component '{typeof(T).Name}' missing on prefab '{address}'");
+				_loggerService?.LogError($"[ObjectFactory] Component '{typeof(T).Name}' missing on prefab '{address}'");
 				Object.Destroy(gameObject);
 				return null;
 			}
 
-			_loggerService?.Log($"[ObjectFactory] ✅ Component '{typeof(T).Name}' loaded successfully from '{address}'");
+			_loggerService?.Log($"[ObjectFactory] Component '{typeof(T).Name}' loaded successfully from '{address}'");
 			return component;
 		}
 
@@ -68,7 +68,7 @@ namespace PlatformCore.Services.Factory
 		{
 			if (!obj)
 			{
-				_loggerService?.LogWarning("[ObjectFactory] ⚠️ Tried to destroy null object");
+				_loggerService?.LogWarning("[ObjectFactory] Tried to destroy null object");
 				return;
 			}
 

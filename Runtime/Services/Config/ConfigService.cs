@@ -25,7 +25,7 @@ public class ConfigService : IService
 		var type = typeof(T);
 
 		var jsonTextAsset = await _resourceService.LoadAsync<TextAsset>(resourcePath);
-		if (jsonTextAsset == null)
+		if (!jsonTextAsset)
 		{
 			_loggerService.LogError($"[ConfigService] Failed to load config at {resourcePath}");
 			return new Dictionary<string, T>();

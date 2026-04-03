@@ -12,12 +12,10 @@ namespace PlatformCore.Services.UI
 	{
 		/// <summary>
 		/// Background RectTransform that will be stretched to the root size.
-		/// If null, tries to find "ElementBackground" child or first child.
 		/// </summary>
 		[SerializeField] private RectTransform _background;
 		/// <summary>
 		/// TMP text component used for size calculations.
-		/// If null, resolves from children.
 		/// </summary>
 		[SerializeField] private TMP_Text _text;
 		/// <summary>
@@ -33,13 +31,9 @@ namespace PlatformCore.Services.UI
 		/// </summary>
 		[SerializeField] private bool _wrap = true;
 		/// <summary>
-		/// When true, preferred sizes are written to LayoutElement (if present or auto-added).
+		/// When true, preferred sizes are written to LayoutElement (if present).
 		/// </summary>
 		[SerializeField] private bool _useLayoutElement = true;
-		/// <summary>
-		/// When true, a LayoutElement will be added if missing.
-		/// </summary>
-		[SerializeField] private bool _autoAddLayoutElement = true;
 		/// <summary>
 		/// When true, applies the calculated size directly to the root RectTransform.
 		/// </summary>
@@ -56,7 +50,6 @@ namespace PlatformCore.Services.UI
 
 		private void OnValidate()
 		{
-			AutoResolve();
 			if (Application.isPlaying)
 			{
 				Refresh();
@@ -94,7 +87,6 @@ namespace PlatformCore.Services.UI
 				return;
 			}
 
-			AutoResolve();
 			if (!_text)
 			{
 				return;
@@ -137,7 +129,7 @@ namespace PlatformCore.Services.UI
 			var size = new Vector2(width, height);
 			if (_useLayoutElement)
 			{
-				var layoutElement = GetOrAddLayoutElement();
+				var layoutElement = GetLayoutElement();
 				if (layoutElement)
 				{
 					layoutElement.preferredWidth = size.x;
@@ -158,43 +150,14 @@ namespace PlatformCore.Services.UI
 			_isRefreshing = false;
 		}
 
-		private LayoutElement GetOrAddLayoutElement()
+		private LayoutElement GetLayoutElement()
 		{
 			if (!_layoutElement)
 			{
 				_layoutElement = GetComponent<LayoutElement>();
-			}
-
-			if (!_layoutElement && _autoAddLayoutElement)
-			{
-				_layoutElement = gameObject.AddComponent<LayoutElement>();
 			}
 
 			return _layoutElement;
-		}
-
-		private void AutoResolve()
-		{
-			if (!_text)
-			{
-				_text = GetComponentInChildren<TMP_Text>(true);
-			}
-
-			if (!_background)
-			{
-				var bg = transform.Find("ElementBackground");
-				if (!bg && transform.childCount > 0)
-				{
-					bg = transform.GetChild(0);
-				}
-
-				_background = bg as RectTransform;
-			}
-
-			if (!_layoutElement)
-			{
-				_layoutElement = GetComponent<LayoutElement>();
-			}
 		}
 
 		private void EnsureStretch()

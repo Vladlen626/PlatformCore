@@ -50,7 +50,11 @@ namespace PlatformCore.Services.UI
 			{
 				Cursor.lockState = CursorLockMode.Locked;
 				Cursor.visible = false;
-				_uiCursorView.Show();
+				if (_uiCursorView)
+				{
+					_uiCursorView.Show();
+				}
+
 				OnCursorStateChanged?.Invoke();
 				_logger?.Log($"[CursorService] LockCursor applied (caller={caller}, before={beforeCount}, after={lockCount}, lockState={Cursor.lockState})");
 			}
@@ -70,7 +74,11 @@ namespace PlatformCore.Services.UI
 			{
 				Cursor.lockState = CursorLockMode.None;
 				Cursor.visible = true;
-				_uiCursorView.Hide();
+				if (_uiCursorView)
+				{
+					_uiCursorView.Hide();
+				}
+
 				OnCursorStateChanged?.Invoke();
 				_logger?.Log($"[CursorService] UnlockCursor applied (caller={caller}, before={beforeCount}, after={lockCount}, lockState={Cursor.lockState})");
 			}

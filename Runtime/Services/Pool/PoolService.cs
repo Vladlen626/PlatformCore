@@ -39,14 +39,14 @@ namespace PlatformCore.Services.Pool
 			_logger?.Log($"[PoolService] Creating pool for {type.Name}: {initialSize} objects from {prefabPath}");
 
 			var prefab = await _resourceService.LoadAsync<GameObject>(prefabPath);
-			if (prefab == null)
+			if (!prefab)
 			{
 				_logger?.LogError($"[PoolService] Failed to load prefab: {prefabPath}");
 				throw new InvalidOperationException($"Cannot create pool: prefab not found at {prefabPath}");
 			}
 
 			var prefabComponent = prefab.GetComponent<T>();
-			if (prefabComponent == null)
+			if (!prefabComponent)
 			{
 				_logger?.LogError($"[PoolService] Component {type.Name} not found on prefab {prefabPath}");
 				throw new InvalidOperationException($"Component {type.Name} not found on prefab");
@@ -76,7 +76,7 @@ namespace PlatformCore.Services.Pool
 			obj.transform.position = position;
 			obj.transform.rotation = rotation;
 
-			if (parent != null)
+			if (parent)
 			{
 				obj.transform.SetParent(parent);
 			}
@@ -86,7 +86,7 @@ namespace PlatformCore.Services.Pool
 
 		public void Return<T>(T component) where T : Component
 		{
-			if (component == null)
+			if (!component)
 			{
 				_logger?.LogWarning("[PoolService] Trying to return null component");
 				return;
@@ -107,7 +107,7 @@ namespace PlatformCore.Services.Pool
 
 		public void ReturnDelayed<T>(T component, float delay) where T : Component
 		{
-			if (component == null)
+			if (!component)
 			{
 				_logger?.LogWarning("[PoolService] Trying to return null component with delay");
 				return;

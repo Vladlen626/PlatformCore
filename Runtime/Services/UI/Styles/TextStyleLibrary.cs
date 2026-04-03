@@ -40,7 +40,7 @@ namespace PlatformCore.Services.UI.Styles
 		{
 			if (styles == null || styles.Count == 0)
 			{
-				throw new InvalidOperationException("TextStyleLibrary is empty.");
+				return null;
 			}
 
 			if (mapDirty)
@@ -50,7 +50,7 @@ namespace PlatformCore.Services.UI.Styles
 
 			if (string.IsNullOrWhiteSpace(id))
 			{
-				throw new InvalidOperationException("Text style id is empty.");
+				return null;
 			}
 
 			var key = id.Trim();
@@ -59,7 +59,7 @@ namespace PlatformCore.Services.UI.Styles
 				return style;
 			}
 
-			throw new InvalidOperationException($"Text style '{id}' not found.");
+			return null;
 		}
 
 		public bool ContainsId(string id)

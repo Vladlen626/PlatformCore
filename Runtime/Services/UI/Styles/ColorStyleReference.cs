@@ -20,20 +20,15 @@ namespace PlatformCore.Services.UI.Styles
 			get
 			{
 				var library = ColorStyleLibraryProvider.GetDefault();
-				if (library == null)
+				if (library == null || string.IsNullOrWhiteSpace(id))
 				{
-					throw new InvalidOperationException("ColorStyleLibrary is missing.");
-				}
-
-				if (string.IsNullOrWhiteSpace(id))
-				{
-					throw new InvalidOperationException("Color style id is empty.");
+					return Color.white;
 				}
 
 				var style = library.GetStyle(id);
 				if (style == null)
 				{
-					throw new InvalidOperationException($"Color style '{id}' not found.");
+					return Color.white;
 				}
 
 				return style.Color;

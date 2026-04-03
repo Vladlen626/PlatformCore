@@ -55,7 +55,7 @@ namespace PlatformCore.Services.Pool
 
 		public void Return(T obj)
 		{
-			if (obj == null || !_activeObjects.Contains(obj))
+			if (!obj || !_activeObjects.Contains(obj))
 			{
 				_logger?.LogWarning($"[ObjectPool] Trying to return object that was not rented: {typeof(T).Name}");
 				return;
@@ -77,14 +77,18 @@ namespace PlatformCore.Services.Pool
 		{
 			foreach (var obj in _activeObjects)
 			{
-				if (obj != null)
+				if (obj)
+				{
 					Object.Destroy(obj.gameObject);
+				}
 			}
 
 			foreach (var obj in _inactiveObjects)
 			{
-				if (obj != null)
+				if (obj)
+				{
 					Object.Destroy(obj.gameObject);
+				}
 			}
 
 			_activeObjects.Clear();
@@ -96,7 +100,7 @@ namespace PlatformCore.Services.Pool
 			var instance = Object.Instantiate(_prefab, _parent);
 			var component = instance.GetComponent<T>();
 
-			if (component == null)
+			if (!component)
 			{
 				_logger?.LogError($"[ObjectPool] Created object missing component: {typeof(T).Name}");
 				Object.Destroy(instance);

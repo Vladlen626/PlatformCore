@@ -1,4 +1,3 @@
-using System;
 using TMPro;
 using UnityEngine;
 
@@ -31,7 +30,7 @@ namespace PlatformCore.Services.UI.Styles
 
 			if (!target)
 			{
-				throw new InvalidOperationException("TextStyleApplier target is missing.");
+				return;
 			}
 
 			style.ApplyTo(target);

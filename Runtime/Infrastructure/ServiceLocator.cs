@@ -13,7 +13,9 @@ namespace PlatformCore.Infrastructure
 			where TImplementation : class, IService, TInterface
 		{
 			if (instance == null)
+			{
 				throw new ArgumentNullException(nameof(instance));
+			}
 
 			var key = typeof(TInterface);
 			if (!_services.TryAdd(key, instance))
@@ -26,7 +28,9 @@ namespace PlatformCore.Infrastructure
 		public T Get<T>() where T : class
 		{
 			if (_services.TryGetValue(typeof(T), out var service))
+			{
 				return service as T;
+			}
 
 			throw new InvalidOperationException($"Service {typeof(T).Name} not registered.");
 		}

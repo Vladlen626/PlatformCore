@@ -38,7 +38,7 @@ namespace PlatformCore.Services.Factory
 
 		public void Unload(Object obj)
 		{
-			if (obj == null)
+			if (!obj)
 			{
 				_loggerService?.LogWarning("[ResourceService] Trying to unload null object");
 				return;

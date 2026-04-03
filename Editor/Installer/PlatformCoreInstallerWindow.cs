@@ -30,7 +30,7 @@ namespace PlatformCore.Editor.Installer
 		private readonly Dictionary<string, string> _statuses = new Dictionary<string, string>();
 		private bool _installing;
 
-		[MenuItem("Tools/Len/PlatformCore/Installer")]
+		[MenuItem("Len/Installer")]
 		private static void OpenWindow()
 		{
 			var window = GetWindow<PlatformCoreInstallerWindow>("PlatformCore Installer");
@@ -94,7 +94,7 @@ namespace PlatformCore.Editor.Installer
 					status = "Unknown";
 				}
 
-				EditorGUILayout.LabelField($"• {entry.Name}", status);
+				EditorGUILayout.LabelField($"- {entry.Name}", status);
 			}
 		}
 

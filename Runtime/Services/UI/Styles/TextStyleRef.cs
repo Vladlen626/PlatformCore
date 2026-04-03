@@ -21,36 +21,36 @@ namespace PlatformCore.Services.UI.Styles
 			get
 			{
 				var library = TextStyleLibraryProvider.GetDefault();
-				if (library == null)
+				if (library == null || string.IsNullOrWhiteSpace(id))
 				{
-					throw new InvalidOperationException("TextStyleLibrary is missing.");
-				}
-
-				if (string.IsNullOrWhiteSpace(id))
-				{
-					throw new InvalidOperationException("Text style id is empty.");
+					return null;
 				}
 
 				var style = library.GetStyle(id);
 				if (style == null)
 				{
-					throw new InvalidOperationException($"Text style '{id}' not found.");
+					return null;
 				}
 
 				return style;
 			}
 		}
 
-		public Color Color => Value.Color;
+		public Color Color => Value?.Color ?? Color.white;
 
 		public void ApplyTo(TextMeshProUGUI text)
 		{
 			if (!text)
 			{
-				throw new InvalidOperationException("Text target is missing.");
+				return;
 			}
 
 			var style = Value;
+			if (style == null)
+			{
+				return;
+			}
+
 			text.color = style.Color;
 			if (style.UseAdvanced)
 			{

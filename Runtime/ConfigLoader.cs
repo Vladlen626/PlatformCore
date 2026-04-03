@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class ConfigLoader<T> where T : class
 {
-	private static Dictionary<string, T> _cache = new Dictionary<string, T>();
+	private static readonly Dictionary<string, T> _cache = new();
 
 	public static T Load(string path)
 	{
@@ -13,7 +13,7 @@ public class ConfigLoader<T> where T : class
 		}
 
 		var file = Resources.Load<TextAsset>(path);
-		if (file == null)
+		if (!file)
 		{
 			Debug.LogError($"Config not found: {path}");
 			return null;

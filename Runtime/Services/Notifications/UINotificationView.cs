@@ -41,14 +41,16 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!backgroundImage)
 			{
-				throw new InvalidOperationException("Notification background image is not assigned.");
+				Debug.LogError("[UINotificationView] Background image is not assigned.");
+				return;
 			}
 
 			var style = isNegative ? negativeColor : positiveColor;
 			if (string.IsNullOrWhiteSpace(style.Id))
 			{
 				var tone = isNegative ? "Negative" : "Positive";
-				throw new InvalidOperationException($"{tone} notification color style is not assigned.");
+				Debug.LogError($"[UINotificationView] {tone} color style is not assigned.");
+				return;
 			}
 
 			backgroundImage.color = style.Value;
@@ -57,6 +59,12 @@ namespace PlatformCore.Services.Notifications
 		protected override void OnAwake()
 		{
 			base.OnAwake();
+			if (!canvasGroup || !text)
+			{
+				Debug.LogError("[UINotificationView] Required references are not assigned.");
+				return;
+			}
+
 			canvasGroup.alpha = 0f;
 			text.gameObject.SetActive(false);
 		}
@@ -64,6 +72,11 @@ namespace PlatformCore.Services.Notifications
 		protected override void OnShow()
 		{
 			base.OnShow();
+			if (!contentRoot || !canvasGroup || !text)
+			{
+				return;
+			}
+
 			originalPos = contentRoot.anchoredPosition;
 			contentRoot.anchoredPosition = originalPos + Vector2.down * initialShift;
 			canvasGroup.alpha = 0f;
