@@ -2,9 +2,7 @@
   "name": "PlatformCore.Tests.Editor",
   "references": [
     "PlatformCore.Core",
-    "PlatformCore.Infrastructure",
-    "UnityEngine.TestRunner",
-    "UnityEditor.TestRunner"
+    "PlatformCore.Infrastructure"
   ],
   "includePlatforms": [
     "Editor"
