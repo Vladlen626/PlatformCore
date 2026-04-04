@@ -27,7 +27,6 @@ namespace PlatformCore.Infrastructure
 
 		private void Awake()
 		{
-			DontDestroyOnLoad(gameObject);
 			Scene = gameObject.scene;
 		}
 	}

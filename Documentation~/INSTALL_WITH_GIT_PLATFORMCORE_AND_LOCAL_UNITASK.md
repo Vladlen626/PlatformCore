@@ -67,7 +67,7 @@ Add this to the consumer project `Packages/manifest.json`:
 3. Add `com.cysharp.unitask` as a local `file:` package using the path to the UniTask package root.
 4. Save `Packages/manifest.json`.
 5. Reopen Unity or wait for Package Manager refresh.
-6. Open `Tools/Len/PlatformCore/Installer` and run `Validate Setup`.
+6. Open `Len/Installer` and run `Validate Setup`.
 
 ## Troubleshooting
 

@@ -2,11 +2,9 @@
 
 Reusable platform foundation for Unity projects.
 
-## Installation (Local Package)
+## Install (Local Package)
 
-1. Open your Unity project.
-2. Open `Packages/manifest.json`.
-3. Add a local dependency:
+1. Add package in consumer project `Packages/manifest.json`:
 
 ```json
 {
@@ -16,38 +14,45 @@ Reusable platform foundation for Unity projects.
 }
 ```
 
-4. Reopen Unity (or trigger package refresh).
-5. Open installer: `Tools/Len/PlatformCore/Installer`.
-6. Click **Validate Setup** (optional: run dependency install actions if your project blocks transitive install).
+2. Reopen Unity or refresh packages.
+3. Open installer: `Len/Installer`.
+4. Click `Validate Setup`.
 
-## Dependencies
+## Dependency Status
 
-### Required (declared in `package.json`)
-- Cinemachine (`com.unity.cinemachine`)
-- TextMesh Pro (`com.unity.textmeshpro`)
-- Input System (`com.unity.inputsystem`)
-- Newtonsoft Json (`com.unity.nuget.newtonsoft-json`)
-- UniTask (`com.cysharp.unitask`)
+Required (declared in `package.json`):
+- `com.unity.cinemachine`
+- `com.unity.inputsystem`
+- `com.unity.nuget.newtonsoft-json`
+- `com.unity.textmeshpro`
+- `com.cysharp.unitask`
+- `com.kyrylokuzyk.primetween`
 
-### Optional
-- FishNet (`com.firstgeargames.fishnet`) — only for FishNet integration/sample.
+Optional:
+- `com.firstgeargames.fishnet` (only for FishNet foundation/sample).
 
-### Manual/External integrations (not required for base package compile)
-- FMOD (audio integration is no-op when FMOD is absent).
-- PrimeTween (optional tween integration, manual setup in consumer project).
+Manual external integration:
+- FMOD is optional. Audio service runs in no-op mode without `FMOD_PRESENT`.
 
-## Samples status
+## Architecture Scope
 
-Current samples are lightweight wiring examples, **not full production demos**:
-- `BasicBootstrap` — bootstrap/config placeholder content.
-- `SettingsPause` — settings/pause flow outline.
-- `CameraSample` — camera wiring outline.
-- `NetworkSample` — optional FishNet-oriented demo scaffold.
+- PlatformCore provides bootstrap/lifecycle/services foundation.
+- FishNet stays a narrow foundation extension layer.
+- PlatformCore is not a full game framework.
+- Game-specific gameplay systems belong in the consumer project.
 
-## Package layout
+## Docs Entry Points
+
+- `Documentation~/SETUP.md`
+- `Documentation~/ARCHITECTURE.md`
+- `Documentation~/EDITOR_TOOLS.md`
+- `Documentation~/DOCS_STATUS.md`
+
+## Package Layout
 
 - `Runtime/`
 - `Editor/`
 - `Documentation~/`
 - `Samples~/`
+- `Templates~/`
 - `Tests/`

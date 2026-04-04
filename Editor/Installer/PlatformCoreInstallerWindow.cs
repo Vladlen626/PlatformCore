@@ -17,6 +17,7 @@ namespace PlatformCore.Editor.Installer
 			new DependencyEntry("Input System", "com.unity.inputsystem", DependencyType.Required),
 			new DependencyEntry("Newtonsoft Json", "com.unity.nuget.newtonsoft-json", DependencyType.Required),
 			new DependencyEntry("UniTask", "com.cysharp.unitask", DependencyType.Required),
+			new DependencyEntry("PrimeTween", "com.kyrylokuzyk.primetween", DependencyType.Required),
 		};
 
 		private static readonly DependencyEntry[] OptionalDependencies =
@@ -57,7 +58,7 @@ namespace PlatformCore.Editor.Installer
 			EditorGUILayout.Space();
 
 			EditorGUILayout.LabelField("Manual / External Setup", EditorStyles.boldLabel);
-			EditorGUILayout.HelpBox("FMOD and PrimeTween are optional integrations and are not auto-installed. Configure them manually only if your project uses related features.", MessageType.Info);
+			EditorGUILayout.HelpBox("FMOD is optional and not auto-installed. Audio service works in no-op mode without FMOD/FMOD_PRESENT.", MessageType.Info);
 			EditorGUILayout.Space();
 
 			using (new EditorGUI.DisabledScope(_installing))

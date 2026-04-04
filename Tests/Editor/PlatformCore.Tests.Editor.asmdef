@@ -1,0 +1,15 @@
+{
+  "name": "PlatformCore.Tests.Editor",
+  "references": [
+    "PlatformCore.Core",
+    "PlatformCore.Infrastructure",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

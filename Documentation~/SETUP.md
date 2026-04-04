@@ -1,6 +1,6 @@
 # Setup
 
-## 1. Add package as local dependency
+## 1. Add Package
 
 In consumer project `Packages/manifest.json`:
 
@@ -12,28 +12,30 @@ In consumer project `Packages/manifest.json`:
 }
 ```
 
-## 2. Refresh packages
+## 2. Refresh Unity Packages
 
-Unity Package Manager will install declared dependencies automatically from `com.len.platformcore/package.json`.
+Reopen Unity or trigger package refresh.
 
-## 3. Run installer window (validation + helper install actions)
+## 3. Run Installer
 
-Open `Len/Installer`:
-- Install Required Dependencies (helper action for required UPM deps)
-- Install Optional Dependencies (FishNet)
-- Install / Update Platform UI Foundation (styles + notifications assets in `Assets/Resources/UI`)
-- Validate Setup
+Open `Len/Installer` and run:
+- `Install Required Dependencies`
+- `Install Optional Dependencies` (only if you need FishNet)
+- `Install / Update Platform UI Foundation`
+- `Validate Setup`
 
-## 4. Required dependencies (declared)
+## 4. Dependency Matrix
+
+Required:
 - Cinemachine
-- TextMesh Pro
 - Input System
 - Newtonsoft Json
+- TextMesh Pro
 - UniTask
+- PrimeTween
 
-## 5. Optional dependencies
-- FishNet (not mandatory; required only for networking sample/integration)
+Optional:
+- FishNet
 
-## 6. Manual/external integrations (optional)
-- FMOD (audio service falls back to no-op when FMOD is not installed)
-- PrimeTween (not required by base runtime)
+Manual external:
+- FMOD (optional; used only when `FMOD_PRESENT` is defined and FMOD package is installed)
