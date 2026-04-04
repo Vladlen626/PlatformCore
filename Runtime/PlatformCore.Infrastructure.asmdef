@@ -2,6 +2,7 @@
   "name": "PlatformCore.Infrastructure",
   "references": [
     "UniTask",
+    "Unity.InputSystem",
     "Unity.TextMeshPro",
     "Unity.Cinemachine",
     "PrimeTween.Runtime",

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -52,6 +53,8 @@ namespace PlatformCore.Editor.Installer
 			EditorGUILayout.Space();
 			DrawDependencyBlock("Optional", OptionalDependencies);
 			EditorGUILayout.Space();
+			DrawPlatformUIFoundationBlock();
+			EditorGUILayout.Space();
 
 			EditorGUILayout.LabelField("Manual / External Setup", EditorStyles.boldLabel);
 			EditorGUILayout.HelpBox("FMOD and PrimeTween are optional integrations and are not auto-installed. Configure them manually only if your project uses related features.", MessageType.Info);
@@ -95,6 +98,43 @@ namespace PlatformCore.Editor.Installer
 				}
 
 				EditorGUILayout.LabelField($"- {entry.Name}", status);
+			}
+		}
+
+		private void DrawPlatformUIFoundationBlock()
+		{
+			EditorGUILayout.LabelField("Platform UI Foundation", EditorStyles.boldLabel);
+			var status = PlatformUIFoundationInstaller.GetStatus(out var details, out _, out _);
+
+			var messageType = MessageType.Info;
+			switch (status)
+			{
+				case PlatformUIFoundationInstallStatus.TemplateMissing:
+					messageType = MessageType.Error;
+					break;
+				case PlatformUIFoundationInstallStatus.Missing:
+				case PlatformUIFoundationInstallStatus.InstalledUnknownVersion:
+				case PlatformUIFoundationInstallStatus.InstalledOutdated:
+					messageType = MessageType.Warning;
+					break;
+				case PlatformUIFoundationInstallStatus.InstalledCurrent:
+					messageType = MessageType.Info;
+					break;
+			}
+
+			EditorGUILayout.HelpBox(details, messageType);
+
+			using (new EditorGUI.DisabledScope(_installing || status == PlatformUIFoundationInstallStatus.TemplateMissing))
+			{
+				if (GUILayout.Button("Install / Update Platform UI Foundation (Recommended)"))
+				{
+					PlatformUIFoundationInstaller.InstallOrUpdate(true);
+				}
+
+				if (GUILayout.Button("Install Missing Files Only"))
+				{
+					PlatformUIFoundationInstaller.InstallOrUpdate(false);
+				}
 			}
 		}
 
@@ -234,6 +274,205 @@ namespace PlatformCore.Editor.Installer
 		{
 			Required,
 			Optional,
+		}
+	}
+
+	internal enum PlatformUIFoundationInstallStatus
+	{
+		TemplateMissing,
+		Missing,
+		InstalledUnknownVersion,
+		InstalledOutdated,
+		InstalledCurrent,
+	}
+
+	internal static class PlatformUIFoundationInstaller
+	{
+		private const string TemplateAssetsRelativePath = "Templates~/PlatformUIFoundation/Assets";
+		private const string TemplateVersionRelativePath = "Templates~/PlatformUIFoundation/ui-foundation.version.txt";
+		private const string InstalledVersionFilePath = "Assets/PlatformCore.Generated/InstallState/platform_ui_foundation.version.txt";
+
+		private static readonly string[] RequiredProjectFiles =
+		{
+			"Assets/Resources/UI/ColorStyleLibrary.asset",
+			"Assets/Resources/UI/TextStyleLibrary.asset",
+			"Assets/Resources/UI/ElementBackground.prefab",
+			"Assets/Resources/UI/UIGlobalNotificationView.prefab",
+			"Assets/Resources/UI/UINotificationsView.prefab",
+			"Assets/Resources/UI/UINotificationView.prefab",
+			"Assets/PlatformCore/UIFoundation/Sprites/BackgroundCubeWhite.png",
+			"Assets/PlatformCore/UIFoundation/Fonts/Roboto-Bold SDF.asset",
+			"Assets/PlatformCore/UIFoundation/Fonts/Roboto-Bold.ttf",
+		};
+
+		public static PlatformUIFoundationInstallStatus GetStatus(
+			out string details,
+			out string templateVersion,
+			out string installedVersion)
+		{
+			templateVersion = GetTemplateVersion();
+			installedVersion = GetInstalledVersion();
+
+			var sourceRoot = GetTemplateAssetsRoot();
+			if (string.IsNullOrWhiteSpace(sourceRoot) || !Directory.Exists(sourceRoot))
+			{
+				details = "Template assets are missing in package.";
+				return PlatformUIFoundationInstallStatus.TemplateMissing;
+			}
+
+			var allFilesPresent = true;
+			for (var i = 0; i < RequiredProjectFiles.Length; i++)
+			{
+				if (!File.Exists(RequiredProjectFiles[i]))
+				{
+					allFilesPresent = false;
+					break;
+				}
+			}
+
+			if (!allFilesPresent)
+			{
+				details = "Foundation assets are not installed.";
+				return PlatformUIFoundationInstallStatus.Missing;
+			}
+
+			if (string.IsNullOrWhiteSpace(installedVersion))
+			{
+				details = "Installed, but version marker is missing.";
+				return PlatformUIFoundationInstallStatus.InstalledUnknownVersion;
+			}
+
+			if (!string.Equals(installedVersion, templateVersion, StringComparison.Ordinal))
+			{
+				details = $"Outdated: installed {installedVersion}, package {templateVersion}.";
+				return PlatformUIFoundationInstallStatus.InstalledOutdated;
+			}
+
+			details = $"Installed (version {installedVersion}).";
+			return PlatformUIFoundationInstallStatus.InstalledCurrent;
+		}
+
+		public static bool InstallOrUpdate(bool overwriteExisting)
+		{
+			var sourceRoot = GetTemplateAssetsRoot();
+			if (string.IsNullOrWhiteSpace(sourceRoot) || !Directory.Exists(sourceRoot))
+			{
+				Debug.LogError("[PlatformUIFoundationInstaller] Template assets are missing in package.");
+				return false;
+			}
+
+			try
+			{
+				var sourceFiles = Directory.GetFiles(sourceRoot, "*", SearchOption.AllDirectories);
+				for (var i = 0; i < sourceFiles.Length; i++)
+				{
+					var sourcePath = sourceFiles[i];
+					if (sourcePath.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+					{
+						continue;
+					}
+
+					var relativePath = sourcePath.Substring(sourceRoot.Length + 1).Replace('\\', '/');
+					var destinationPath = Path.Combine("Assets", relativePath).Replace('\\', '/');
+
+					CopyAssetFileWithMeta(sourcePath, destinationPath, overwriteExisting);
+				}
+
+				WriteInstalledVersionMarker(GetTemplateVersion());
+				AssetDatabase.Refresh();
+				Debug.Log("[PlatformUIFoundationInstaller] Platform UI foundation installed.");
+				return true;
+			}
+			catch (Exception exception)
+			{
+				Debug.LogError($"[PlatformUIFoundationInstaller] Install failed: {exception}");
+				return false;
+			}
+		}
+
+		private static string GetTemplateAssetsRoot()
+		{
+			var packageRoot = GetPackageRoot();
+			if (string.IsNullOrWhiteSpace(packageRoot))
+			{
+				return null;
+			}
+
+			return Path.Combine(packageRoot, TemplateAssetsRelativePath);
+		}
+
+		private static string GetTemplateVersion()
+		{
+			var packageRoot = GetPackageRoot();
+			if (string.IsNullOrWhiteSpace(packageRoot))
+			{
+				return string.Empty;
+			}
+
+			var versionPath = Path.Combine(packageRoot, TemplateVersionRelativePath);
+			if (!File.Exists(versionPath))
+			{
+				return string.Empty;
+			}
+
+			return File.ReadAllText(versionPath).Trim();
+		}
+
+		private static string GetInstalledVersion()
+		{
+			if (!File.Exists(InstalledVersionFilePath))
+			{
+				return string.Empty;
+			}
+
+			return File.ReadAllText(InstalledVersionFilePath).Trim();
+		}
+
+		private static void WriteInstalledVersionMarker(string version)
+		{
+			var directory = Path.GetDirectoryName(InstalledVersionFilePath);
+			if (!string.IsNullOrWhiteSpace(directory))
+			{
+				Directory.CreateDirectory(directory);
+			}
+
+			File.WriteAllText(InstalledVersionFilePath, string.IsNullOrWhiteSpace(version) ? "unknown" : version);
+		}
+
+		private static string GetPackageRoot()
+		{
+			var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(PlatformUIFoundationInstaller).Assembly);
+			return packageInfo?.resolvedPath;
+		}
+
+		private static void CopyAssetFileWithMeta(string sourcePath, string destinationPath, bool overwriteExisting)
+		{
+			var destinationDirectory = Path.GetDirectoryName(destinationPath);
+			if (!string.IsNullOrWhiteSpace(destinationDirectory))
+			{
+				Directory.CreateDirectory(destinationDirectory);
+			}
+
+			var destinationExists = File.Exists(destinationPath);
+			if (destinationExists && !overwriteExisting)
+			{
+				var sourceMeta = sourcePath + ".meta";
+				var destinationMeta = destinationPath + ".meta";
+				if (File.Exists(sourceMeta) && !File.Exists(destinationMeta))
+				{
+					File.Copy(sourceMeta, destinationMeta, true);
+				}
+
+				return;
+			}
+
+			File.Copy(sourcePath, destinationPath, true);
+
+			var sourceMetaPath = sourcePath + ".meta";
+			if (File.Exists(sourceMetaPath))
+			{
+				File.Copy(sourceMetaPath, destinationPath + ".meta", true);
+			}
 		}
 	}
 }

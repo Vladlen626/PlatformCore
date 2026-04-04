@@ -18,9 +18,10 @@ Unity Package Manager will install declared dependencies automatically from `com
 
 ## 3. Run installer window (validation + helper install actions)
 
-Open `Tools/Len/PlatformCore/Installer`:
+Open `Len/Installer`:
 - Install Required Dependencies (helper action for required UPM deps)
 - Install Optional Dependencies (FishNet)
+- Install / Update Platform UI Foundation (styles + notifications assets in `Assets/Resources/UI`)
 - Validate Setup
 
 ## 4. Required dependencies (declared)

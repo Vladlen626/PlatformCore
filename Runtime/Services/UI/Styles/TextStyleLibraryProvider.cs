@@ -1,10 +1,10 @@
+using PlatformCore.Services.Factory;
 using UnityEngine;
 
 namespace PlatformCore.Services.UI.Styles
 {
 	public static class TextStyleLibraryProvider
 	{
-		private const string DefaultResourcePath = "UI/TextStyleLibrary";
 		private static TextStyleLibrary cached;
 
 		public static TextStyleLibrary GetDefault()
@@ -14,7 +14,7 @@ namespace PlatformCore.Services.UI.Styles
 				return cached;
 			}
 
-			cached = Resources.Load<TextStyleLibrary>(DefaultResourcePath);
+			cached = Resources.Load<TextStyleLibrary>(ResourcePaths.Platform.UI.TextStyleLibrary);
 			return cached;
 		}
 	}

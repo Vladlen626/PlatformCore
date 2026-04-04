@@ -8,16 +8,10 @@ namespace PlatformCore.Services.Factory
 		/// </summary>
 		public static class Platform
 		{
-			public static class Root
-			{
-				public const string PrimeTweenSettings = "PrimeTweenSettings";
-			}
-
 			public static class UI
 			{
 				public const string ColorStyleLibrary = "UI/ColorStyleLibrary";
 				public const string TextStyleLibrary = "UI/TextStyleLibrary";
-				public const string UICursorView = "UI/UICursorView";
 				public const string UIGlobalNotificationView = "UI/UIGlobalNotificationView";
 				public const string UINotificationsView = "UI/UINotificationsView";
 				public const string UINotificationView = "UI/UINotificationView";

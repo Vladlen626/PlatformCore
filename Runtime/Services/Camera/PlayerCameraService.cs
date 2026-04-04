@@ -13,11 +13,17 @@ namespace PlatformCore.Services
 		public const string Primary = "primary";
 	}
 
+	public sealed class CameraServiceOptions
+	{
+		public string PrimaryCameraResourcePath { get; set; } = "CinemachineCamera";
+	}
+
 	public class CameraService : BaseAsyncService, ICameraService
 	{
 		private const string PlayerCamera = "PlayerCamera";
 		private readonly IObjectFactory _objectFactory;
 		private readonly Transform _cameraParent;
+		private readonly CameraServiceOptions _options;
 
 		private CinemachineBasicMultiChannelPerlin _noise;
 		private CinemachineBasicMultiChannelPerlin _activeShakeNoise;
@@ -32,10 +38,14 @@ namespace PlatformCore.Services
 		private readonly Dictionary<string, CinemachineCamera> allCameras =
 			new Dictionary<string, CinemachineCamera>();
 
-		public CameraService(IObjectFactory objectFactory, Transform cameraParent = null)
+		public CameraService(
+			IObjectFactory objectFactory,
+			Transform cameraParent = null,
+			CameraServiceOptions options = null)
 		{
 			_objectFactory = objectFactory;
 			_cameraParent = cameraParent;
+			_options = options ?? new CameraServiceOptions();
 		}
 
 		protected override async UniTask OnPreInitializeAsync(CancellationToken ct)
@@ -46,8 +56,17 @@ namespace PlatformCore.Services
 				brain = mainCamera.GetComponent<CinemachineBrain>();
 			}
 
-			var camera = await _objectFactory.CreateAsync<CinemachineCamera>(ResourcePaths.Sample.Player.CinemachineCamera,
-				Vector3.zero, Quaternion.identity, _cameraParent);
+			if (string.IsNullOrWhiteSpace(_options.PrimaryCameraResourcePath))
+			{
+				Debug.LogError("[CameraService] PrimaryCameraResourcePath is empty.");
+				return;
+			}
+
+			var camera = await _objectFactory.CreateAsync<CinemachineCamera>(
+				_options.PrimaryCameraResourcePath,
+				Vector3.zero,
+				Quaternion.identity,
+				_cameraParent);
 			if (!camera)
 			{
 				Debug.LogError("[CameraService] Failed to create primary camera.");
@@ -58,7 +77,7 @@ namespace PlatformCore.Services
 			camera.name = PlayerCamera;
 			allCameras.Add(CameraIds.Primary, camera);
 
-			SetActiveCamera(CameraIds.Primary);
+			await SetActiveCameraAsync(CameraIds.Primary, ct);
 		}
 
 		public override void Dispose()

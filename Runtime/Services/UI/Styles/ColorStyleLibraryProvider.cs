@@ -1,10 +1,10 @@
+using PlatformCore.Services.Factory;
 using UnityEngine;
 
 namespace PlatformCore.Services.UI.Styles
 {
 	public static class ColorStyleLibraryProvider
 	{
-		private const string DefaultResourcePath = "UI/ColorStyleLibrary";
 		private static ColorStyleLibrary cached;
 
 		public static ColorStyleLibrary GetDefault()
@@ -14,7 +14,7 @@ namespace PlatformCore.Services.UI.Styles
 				return cached;
 			}
 
-			cached = Resources.Load<ColorStyleLibrary>(DefaultResourcePath);
+			cached = Resources.Load<ColorStyleLibrary>(ResourcePaths.Platform.UI.ColorStyleLibrary);
 			return cached;
 		}
 	}
