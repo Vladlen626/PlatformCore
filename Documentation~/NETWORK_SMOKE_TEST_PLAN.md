@@ -8,12 +8,13 @@ Goal: verify baseline network behavior without building a large framework.
 - FishNet package installed in consumer project.
 - `PlatformCore.Infrastructure.FishNet` assembly is enabled by package version define.
 - Build Settings contain `Persistent` and gameplay scene(s).
-- Player prefab is network-ready (FishNet object + required sync component).
+- Player prefab is network-ready (`NetworkObject`, `NetworkTransform`, owner bootstrap script).
+- Persistent scene contains FishNet `NetworkManager` + `PlayerSpawner`.
 
 ## Test Case A: Editor Host + Editor Client
 
-1. Launch host.
-2. Launch client and connect to localhost.
+1. Launch host with `-host`.
+2. Launch client with `-client -address 127.0.0.1 -port 7770`.
 3. Verify two player instances exist.
 4. Verify each peer controls only its own player (owner-only input).
 5. Verify each peer has camera only on local owner (owner-only camera attach).
@@ -27,13 +28,14 @@ Pass criteria:
 ## Test Case B: Windows Build + Editor
 
 1. Build Windows player.
-2. Start host in build, connect client from editor (localhost).
-3. Repeat checks from Test Case A.
+2. Start host in build with `-host`.
+3. Start client in editor with `-client -address 127.0.0.1 -port 7770`.
+4. Repeat checks from Test Case A.
 
 ## Test Case C: Windows Build + Windows Build
 
-1. Run two local builds (host and client).
-2. Connect on localhost.
+1. Run host build with `-host`.
+2. Run client build with `-client -address 127.0.0.1 -port 7770`.
 3. Repeat checks from Test Case A.
 
 ## Failure Checklist
