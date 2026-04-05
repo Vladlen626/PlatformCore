@@ -1,8 +1,10 @@
 {
   "name": "PlatformCore.Infrastructure.FishNet",
   "references": [
+    "PlatformCore.Core",
     "PlatformCore.Infrastructure",
-    "FishNet.Runtime"
+    "FishNet.Runtime",
+    "UniTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
