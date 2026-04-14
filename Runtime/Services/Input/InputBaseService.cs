@@ -21,6 +21,10 @@ namespace PlatformCore.Services.Input
 		private InputAction _moveAction;
 		private InputAction _lookAction;
 		private InputAction _jumpAction;
+		private InputAction _sprintAction;
+		private InputAction _interactAction;
+		private InputAction _primaryAction;
+		private InputAction _secondaryAction;
 		private InputAction _pauseAction;
 		private InputAction _uiSubmitAction;
 		private InputAction _uiCancelAction;
@@ -28,7 +32,11 @@ namespace PlatformCore.Services.Input
 		public Vector2 Move => _moveAction != null ? _moveAction.ReadValue<Vector2>() : Vector2.zero;
 		public Vector2 Look => _lookAction != null ? _lookAction.ReadValue<Vector2>() : Vector2.zero;
 		public bool IsJumping => _jumpAction != null && _jumpAction.IsPressed();
+		public bool IsSprintPressed => _sprintAction != null && _sprintAction.IsPressed();
 		public bool IsJumpPressedThisFrame => _jumpAction != null && _jumpAction.WasPressedThisFrame();
+		public bool IsInteractPressedThisFrame => _interactAction != null && _interactAction.WasPressedThisFrame();
+		public bool IsPrimaryActionPressedThisFrame => _primaryAction != null && _primaryAction.WasPressedThisFrame();
+		public bool IsSecondaryActionPressedThisFrame => _secondaryAction != null && _secondaryAction.WasPressedThisFrame();
 		public bool IsPausePressedThisFrame => _pauseAction != null && _pauseAction.WasPressedThisFrame();
 		public bool IsUISubmitPressedThisFrame => _uiSubmitAction != null && _uiSubmitAction.WasPressedThisFrame();
 		public bool IsUICancelPressedThisFrame => _uiCancelAction != null && _uiCancelAction.WasPressedThisFrame();
@@ -47,6 +55,12 @@ namespace PlatformCore.Services.Input
 
 			_lookAction = _playerMap.AddAction("Look", InputActionType.Value, "<Mouse>/delta");
 			_jumpAction = _playerMap.AddAction("Jump", InputActionType.Button, "<Keyboard>/space");
+			_sprintAction = _playerMap.AddAction("Sprint", InputActionType.Button);
+			_sprintAction.AddBinding("<Keyboard>/leftShift");
+			_sprintAction.AddBinding("<Keyboard>/rightShift");
+			_interactAction = _playerMap.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
+			_primaryAction = _playerMap.AddAction("PrimaryAction", InputActionType.Button, "<Mouse>/leftButton");
+			_secondaryAction = _playerMap.AddAction("SecondaryAction", InputActionType.Button, "<Mouse>/rightButton");
 			_pauseAction = _playerMap.AddAction("Pause", InputActionType.Button, "<Keyboard>/escape");
 
 			_uiSubmitAction = _uiMap.AddAction("Submit", InputActionType.Button);
@@ -124,6 +138,10 @@ namespace PlatformCore.Services.Input
 			_moveAction = null;
 			_lookAction = null;
 			_jumpAction = null;
+			_sprintAction = null;
+			_interactAction = null;
+			_primaryAction = null;
+			_secondaryAction = null;
 			_pauseAction = null;
 			_uiSubmitAction = null;
 			_uiCancelAction = null;

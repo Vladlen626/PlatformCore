@@ -17,7 +17,11 @@ namespace PlatformCore.Services.Input
 		Vector2 Move { get; }
 		Vector2 Look { get; }
 		bool IsJumping { get; }
+		bool IsSprintPressed { get; }
 		bool IsJumpPressedThisFrame { get; }
+		bool IsInteractPressedThisFrame { get; }
+		bool IsPrimaryActionPressedThisFrame { get; }
+		bool IsSecondaryActionPressedThisFrame { get; }
 		bool IsPausePressedThisFrame { get; }
 		bool IsUISubmitPressedThisFrame { get; }
 		bool IsUICancelPressedThisFrame { get; }
