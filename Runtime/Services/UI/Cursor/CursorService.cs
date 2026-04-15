@@ -32,6 +32,7 @@ namespace PlatformCore.Services.UI
 		public UniTask PostInitializeAsync(CancellationToken ct)
 		{
 			_uiCursorView = _uiService.GetWindow<UICursorView>();
+			_uiCursorView.gameObject.SetActive(true);
 			if (_uiCursorView)
 			{
 				_uiCursorView.Hide();
