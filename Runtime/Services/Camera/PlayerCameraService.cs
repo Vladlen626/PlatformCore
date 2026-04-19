@@ -11,6 +11,13 @@ namespace PlatformCore.Services
 	public static class CameraIds
 	{
 		public const string Primary = "primary";
+		public const string MainMenu = "main_menu";
+	}
+
+	public static class CameraTransitions
+	{
+		public static readonly CinemachineBlendDefinition Instant =
+			new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f);
 	}
 
 	public sealed class CameraServiceOptions
@@ -118,22 +125,15 @@ namespace PlatformCore.Services
 		
 		public async UniTask SetActiveCameraAsync(string cameraId, CancellationToken ct = default)
 		{
-			if (!allCameras.TryGetValue(cameraId, out _))
-			{
-				Debug.LogWarning($"Camera {cameraId} not found!");
-				return;
-			}
-			
-			if (!brain)
-			{
-				Debug.LogWarning("No CinemachineBrain found on main camera!");
-				SetActiveCamera(cameraId);
-				return;
-			}
+			await SetActiveCameraAsyncInternal(cameraId, null, ct);
+		}
 
-			SetActiveCamera(cameraId);
-
-			await UniTask.WaitUntil(() => !brain.IsBlending, cancellationToken: ct);
+		public async UniTask SetActiveCameraAsync(
+			string cameraId,
+			CinemachineBlendDefinition transitionBlend,
+			CancellationToken ct = default)
+		{
+			await SetActiveCameraAsyncInternal(cameraId, transitionBlend, ct);
 		}
 
 		public void SetActiveCamera(string cameraId)
@@ -144,6 +144,88 @@ namespace PlatformCore.Services
 				return;
 			}
 
+			ActivateCamera(nextCamera, cameraId);
+		}
+
+		public void SetActiveCamera(string cameraId, CinemachineBlendDefinition transitionBlend)
+		{
+			SwitchCameraWithBlendAsync(cameraId, transitionBlend).Forget();
+		}
+
+		private async UniTask SetActiveCameraAsyncInternal(
+			string cameraId,
+			CinemachineBlendDefinition? transitionBlend,
+			CancellationToken ct)
+		{
+			if (!allCameras.TryGetValue(cameraId, out var nextCamera))
+			{
+				Debug.LogWarning($"Camera {cameraId} not found!");
+				return;
+			}
+
+			if (!brain)
+			{
+				ActivateCamera(nextCamera, cameraId);
+				return;
+			}
+
+			if (!transitionBlend.HasValue)
+			{
+				ActivateCamera(nextCamera, cameraId);
+				await UniTask.WaitUntil(() => !brain.IsBlending, cancellationToken: ct);
+				return;
+			}
+
+			var previousBlend = brain.DefaultBlend;
+			try
+			{
+				brain.DefaultBlend = transitionBlend.Value;
+				ActivateCamera(nextCamera, cameraId);
+
+				if (transitionBlend.Value.Style != CinemachineBlendDefinition.Styles.Cut)
+				{
+					await UniTask.WaitUntil(() => !brain.IsBlending, cancellationToken: ct);
+				}
+			}
+			finally
+			{
+				brain.DefaultBlend = previousBlend;
+			}
+		}
+
+		private async UniTask SwitchCameraWithBlendAsync(string cameraId, CinemachineBlendDefinition transitionBlend)
+		{
+			if (!allCameras.TryGetValue(cameraId, out var nextCamera))
+			{
+				Debug.LogWarning($"Camera {cameraId} not found!");
+				return;
+			}
+
+			if (!brain)
+			{
+				ActivateCamera(nextCamera, cameraId);
+				return;
+			}
+
+			var previousBlend = brain.DefaultBlend;
+			try
+			{
+				brain.DefaultBlend = transitionBlend;
+				ActivateCamera(nextCamera, cameraId);
+
+				if (transitionBlend.Style != CinemachineBlendDefinition.Styles.Cut)
+				{
+					await UniTask.WaitUntil(() => !brain.IsBlending);
+				}
+			}
+			finally
+			{
+				brain.DefaultBlend = previousBlend;
+			}
+		}
+
+		private void ActivateCamera(CinemachineCamera nextCamera, string cameraId)
+		{
 			if (currentCamera == nextCamera && ActiveCameraId == cameraId)
 			{
 				return;

@@ -163,6 +163,11 @@ namespace PlatformCore.Services.Notifications
 				rect.SetParent(parent, false);
 			}
 
+			if (!view.gameObject.activeSelf)
+			{
+				view.gameObject.SetActive(true);
+			}
+
 			var tcs = new UniTaskCompletionSource();
 			void OnShowed(UINotificationView v)
 			{

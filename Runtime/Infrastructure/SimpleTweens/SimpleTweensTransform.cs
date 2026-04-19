@@ -40,6 +40,27 @@ namespace PlatformCore.Infrastructure.SimpleTweens
 			return Tween.LocalPosition(target, startPosition, targetPosition, duration, ease: ease);
 		}
 
+		public static void MoveToLocalPosition(Transform target, Vector3 targetLocalPosition, float duration = 0.25f)
+		{
+			MoveToLocalPosition(target, targetLocalPosition, duration, Ease.InOutCubic);
+		}
+
+		public static void MoveToLocalPosition(Transform target, Vector3 targetLocalPosition, float duration, Ease ease)
+		{
+			Tween.StopAll(target);
+			Tween.LocalPosition(target, target.localPosition, targetLocalPosition, duration, ease: ease);
+		}
+
+		public static void MoveToLocalPositionSmoothStop(Transform target, Vector3 targetLocalPosition, float duration = 0.25f)
+		{
+			MoveToLocalPosition(target, targetLocalPosition, duration, Ease.OutCubic);
+		}
+
+		public static void MoveToLocalPositionSmoothStart(Transform target, Vector3 targetLocalPosition, float duration = 0.25f)
+		{
+			MoveToLocalPosition(target, targetLocalPosition, duration, Ease.InCubic);
+		}
+
 		/// <summary>
 		/// Plays a short scale punch around the current local scale.
 		/// Useful for impact feedback and click responses.

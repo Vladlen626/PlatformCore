@@ -11,7 +11,9 @@ namespace PlatformCore.Services
 		string ActiveCameraId { get; }
 		event Action<string> ActiveCameraChanged;
 		void SetActiveCamera(string cameraId);
+		void SetActiveCamera(string cameraId, CinemachineBlendDefinition transitionBlend);
 		UniTask SetActiveCameraAsync(string cameraId, CancellationToken ct = default);
+		UniTask SetActiveCameraAsync(string cameraId, CinemachineBlendDefinition transitionBlend, CancellationToken ct = default);
 		void AddCamera(string cameraId, CinemachineCamera camera);
 		void AttachPrimaryCameraTo(Transform target);
 		Transform GetCameraTransform();
