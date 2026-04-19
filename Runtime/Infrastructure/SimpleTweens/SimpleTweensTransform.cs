@@ -61,6 +61,17 @@ namespace PlatformCore.Infrastructure.SimpleTweens
 			MoveToLocalPosition(target, targetLocalPosition, duration, Ease.InCubic);
 		}
 
+		public static void RotateToLocalEulerAngles(Transform target, Vector3 targetLocalEulerAngles, float duration = 0.25f)
+		{
+			RotateToLocalEulerAngles(target, targetLocalEulerAngles, duration, Ease.InOutCubic);
+		}
+
+		public static void RotateToLocalEulerAngles(Transform target, Vector3 targetLocalEulerAngles, float duration, Ease ease)
+		{
+			Tween.StopAll(target);
+			Tween.LocalRotation(target, target.localEulerAngles, targetLocalEulerAngles, duration, ease: ease);
+		}
+
 		/// <summary>
 		/// Plays a short scale punch around the current local scale.
 		/// Useful for impact feedback and click responses.
