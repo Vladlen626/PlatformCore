@@ -1,4 +1,4 @@
-using System;
+using Cysharp.Threading.Tasks;
 using PlatformCore.Services.UI;
 using PlatformCore.Services.UI.Styles;
 using TMPro;
@@ -9,7 +9,6 @@ namespace PlatformCore.Services.Notifications
 {
 	public class UINotificationView : UIBaseElement
 	{
-		[SerializeField] private CanvasGroup canvasGroup;
 		[SerializeField] private RectTransform contentRoot;
 		[SerializeField] private UIBackgroundSizer backgroundSizer;
 		[SerializeField] private Image backgroundImage;
@@ -22,12 +21,10 @@ namespace PlatformCore.Services.Notifications
 		[SerializeField] private ColorStyleRef positiveColor;
 		[SerializeField] private ColorStyleRef negativeColor;
 
-		private Vector2 originalPos;
-		private Coroutine animationRoutine;
+		private Vector2 _basePosition;
+		private int _animationVersion;
 
-		public event Action<UINotificationView> Showed;
-
-		public void SetText(string value, bool isNegative = false)
+		public async UniTask PlayAsync(string value, bool isNegative = false)
 		{
 			text.text = value;
 			ApplyToneColor(isNegative);
@@ -35,101 +32,83 @@ namespace PlatformCore.Services.Notifications
 			{
 				backgroundSizer.Refresh();
 			}
-		}
 
-		private void ApplyToneColor(bool isNegative)
-		{
-			if (!backgroundImage)
+			Show();
+			_group.alpha = 0f;
+			_group.interactable = false;
+			_group.blocksRaycasts = false;
+			text.gameObject.SetActive(true);
+			contentRoot.anchoredPosition = _basePosition + Vector2.down * initialShift;
+
+			var version = ++_animationVersion;
+			await AnimateAsync(
+				smoothDuration,
+				0f,
+				1f,
+				_basePosition + Vector2.down * initialShift,
+				_basePosition,
+				version);
+			await UniTask.Delay((int)(Mathf.Max(0f, showDelay) * 1000f), DelayType.UnscaledDeltaTime);
+			if (version != _animationVersion)
 			{
-				Debug.LogError("[UINotificationView] Background image is not assigned.");
 				return;
 			}
 
-			var style = isNegative ? negativeColor : positiveColor;
-			if (string.IsNullOrWhiteSpace(style.Id))
+			await AnimateAsync(
+				fadeDuration,
+				1f,
+				0f,
+				_basePosition,
+				new Vector2(_basePosition.x + initialShift, _basePosition.y),
+				version);
+			if (version != _animationVersion)
 			{
-				var tone = isNegative ? "Negative" : "Positive";
-				Debug.LogError($"[UINotificationView] {tone} color style is not assigned.");
 				return;
 			}
 
-			backgroundImage.color = style.Value;
+			text.gameObject.SetActive(false);
+			Hide();
 		}
 
 		protected override void OnAwake()
 		{
 			base.OnAwake();
-			if (!canvasGroup || !text)
-			{
-				Debug.LogError("[UINotificationView] Required references are not assigned.");
-				return;
-			}
-
-			canvasGroup.alpha = 0f;
+			_basePosition = contentRoot.anchoredPosition;
+			_group.alpha = 0f;
 			text.gameObject.SetActive(false);
-		}
-
-		protected override void OnShow()
-		{
-			base.OnShow();
-			if (!contentRoot || !canvasGroup || !text)
-			{
-				return;
-			}
-
-			originalPos = contentRoot.anchoredPosition;
-			contentRoot.anchoredPosition = originalPos + Vector2.down * initialShift;
-			canvasGroup.alpha = 0f;
-			text.gameObject.SetActive(true);
-
-			if (animationRoutine != null)
-			{
-				StopCoroutine(animationRoutine);
-			}
-
-			animationRoutine = StartCoroutine(PlayAnimation());
 		}
 
 		protected override void OnHide()
 		{
-			if (animationRoutine != null)
-			{
-				StopCoroutine(animationRoutine);
-				animationRoutine = null;
-			}
-
-			base.OnHide();
-		}
-
-		private System.Collections.IEnumerator PlayAnimation()
-		{
-			yield return FadeAndMove(contentRoot.anchoredPosition, originalPos, 0f, 1f, smoothDuration);
-			yield return new WaitForSeconds(showDelay);
-			yield return FadeAndMove(contentRoot.anchoredPosition, new Vector2(originalPos.x + 50f, originalPos.y), 1f, 0f, fadeDuration);
-
+			_animationVersion++;
+			contentRoot.anchoredPosition = _basePosition;
+			contentRoot.localScale = Vector3.one;
 			text.gameObject.SetActive(false);
-			Showed?.Invoke(this);
 			base.OnHide();
-			animationRoutine = null;
 		}
 
-		private System.Collections.IEnumerator FadeAndMove(Vector2 fromPos, Vector2 toPos, float fromAlpha, float toAlpha, float duration)
+		private void ApplyToneColor(bool isNegative)
+		{
+			backgroundImage.color = (isNegative ? negativeColor : positiveColor).Value;
+		}
+
+		private async UniTask AnimateAsync(float duration, float fromAlpha, float toAlpha, Vector2 fromPos, Vector2 toPos, int version)
 		{
 			if (duration <= 0f)
 			{
 				contentRoot.anchoredPosition = toPos;
-				canvasGroup.alpha = toAlpha;
-				yield break;
+				_group.alpha = toAlpha;
+				return;
 			}
 
 			var elapsed = 0f;
-			while (elapsed < duration)
+			while (elapsed < duration && version == _animationVersion)
 			{
 				elapsed += Time.unscaledDeltaTime;
 				var t = Mathf.Clamp01(elapsed / duration);
 				contentRoot.anchoredPosition = Vector2.LerpUnclamped(fromPos, toPos, t);
-				canvasGroup.alpha = Mathf.LerpUnclamped(fromAlpha, toAlpha, t);
-				yield return null;
+				_group.alpha = Mathf.LerpUnclamped(fromAlpha, toAlpha, t);
+				await UniTask.Yield();
 			}
 		}
 	}
