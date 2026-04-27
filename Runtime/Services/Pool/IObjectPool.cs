@@ -104,7 +104,7 @@ namespace PlatformCore.Services.Pool
 			{
 				_logger?.LogError($"[ObjectPool] Created object missing component: {typeof(T).Name}");
 				Object.Destroy(instance);
-				throw new InvalidOperationException($"Component {typeof(T).Name} not found on instantiated object");
+				throw new MissingComponentException($"Component {typeof(T).Name} not found on instantiated object");
 			}
 
 			return component;

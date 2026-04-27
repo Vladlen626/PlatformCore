@@ -83,22 +83,22 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!contentRoot)
 			{
-				throw new InvalidOperationException("UINotificationView requires contentRoot reference.");
+				throw new MissingReferenceException("UINotificationView requires contentRoot reference.");
 			}
 
 			if (!backgroundSizer)
 			{
-				throw new InvalidOperationException("UINotificationView requires backgroundSizer reference.");
+				throw new MissingReferenceException("UINotificationView requires backgroundSizer reference.");
 			}
 
 			if (!backgroundImage)
 			{
-				throw new InvalidOperationException("UINotificationView requires backgroundImage reference.");
+				throw new MissingReferenceException("UINotificationView requires backgroundImage reference.");
 			}
 
 			if (!text)
 			{
-				throw new InvalidOperationException("UINotificationView requires text reference.");
+				throw new MissingReferenceException("UINotificationView requires text reference.");
 			}
 		}
 

@@ -24,22 +24,22 @@ namespace PlatformCore.Services.Pool
 		public async UniTask CreatePoolAsync<T>(string key, string prefabPath, int initialSize = 10, Transform parent = null)
 			where T : Component
 		{
-			var poolId = (typeof(T), key);
-			if (_pools.ContainsKey(poolId))
-			{
-				throw new InvalidOperationException($"Pool for type '{typeof(T).Name}' and key '{key}' is already registered.");
-			}
+				var poolId = (typeof(T), key);
+				if (_pools.ContainsKey(poolId))
+				{
+					throw new ArgumentException($"Pool for type '{typeof(T).Name}' and key '{key}' is already registered.", nameof(key));
+				}
 
-			var prefab = await _resourceService.LoadAsync<GameObject>(prefabPath);
-			if (!prefab)
-			{
-				throw new InvalidOperationException($"Pool prefab not found for type '{typeof(T).Name}' and key '{key}'. Path: '{prefabPath}'.");
-			}
+				var prefab = await _resourceService.LoadAsync<GameObject>(prefabPath);
+				if (!prefab)
+				{
+					throw new MissingReferenceException($"Pool prefab not found for type '{typeof(T).Name}' and key '{key}'. Path: '{prefabPath}'.");
+				}
 
-			if (!prefab.GetComponent<T>())
-			{
-				throw new InvalidOperationException($"Pool prefab at '{prefabPath}' is missing required component '{typeof(T).Name}' for key '{key}'.");
-			}
+				if (!prefab.GetComponent<T>())
+				{
+					throw new MissingComponentException($"Pool prefab at '{prefabPath}' is missing required component '{typeof(T).Name}' for key '{key}'.");
+				}
 
 			var poolParent = parent ?? CreatePoolParent<T>(key);
 			var pool = new ObjectPool<T>(prefab, initialSize, poolParent, _logger);
@@ -91,7 +91,7 @@ namespace PlatformCore.Services.Pool
 		{
 			if (_pools.TryGetValue((typeof(T), key), out var pool) == false)
 			{
-				throw new InvalidOperationException($"Pool for type '{typeof(T).Name}' and key '{key}' was not found.");
+				throw new KeyNotFoundException($"Pool for type '{typeof(T).Name}' and key '{key}' was not found.");
 			}
 
 			return (ObjectPool<T>)pool;

@@ -40,18 +40,18 @@ namespace PlatformCore.Services.Notifications
 		{
 			ThrowIfDisposed();
 			await _uiService.PreloadAsync<UIGlobalNotificationView>();
-			_bannerView = _uiService.GetWindow<UIGlobalNotificationView>();
-			if (!_bannerView)
-			{
-				throw new InvalidOperationException("UIGlobalNotificationView is required but was not found after preload.");
-			}
+				_bannerView = _uiService.GetWindow<UIGlobalNotificationView>();
+				if (!_bannerView)
+				{
+					throw new MissingReferenceException("UIGlobalNotificationView is required but was not found after preload.");
+				}
 
 			await _uiService.PreloadAsync<UINotificationsView>();
-			_notificationsView = _uiService.GetWindow<UINotificationsView>();
-			if (!_notificationsView)
-			{
-				throw new InvalidOperationException("UINotificationsView is required but was not found after preload.");
-			}
+				_notificationsView = _uiService.GetWindow<UINotificationsView>();
+				if (!_notificationsView)
+				{
+					throw new MissingReferenceException("UINotificationsView is required but was not found after preload.");
+				}
 
 			_bannerView.gameObject.SetActive(true);
 			_notificationsView.gameObject.SetActive(true);
@@ -158,7 +158,7 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (string.IsNullOrWhiteSpace(_options.ToastItemResourcePath))
 			{
-				throw new InvalidOperationException("ToastItemResourcePath is required for notification toasts.");
+				throw new ArgumentException("ToastItemResourcePath is required for notification toasts.", nameof(_options.ToastItemResourcePath));
 			}
 
 			var view = await _objectFactory.CreateAsync<UINotificationView>(
@@ -169,7 +169,7 @@ namespace PlatformCore.Services.Notifications
 
 			if (!view)
 			{
-				throw new InvalidOperationException("UINotificationView prefab must contain UINotificationView component.");
+				throw new MissingReferenceException("UINotificationView prefab must contain UINotificationView component.");
 			}
 
 			view.gameObject.SetActive(true);
@@ -218,7 +218,7 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!_isInitialized)
 			{
-				throw new InvalidOperationException("GlobalNotificationService is not initialized.");
+				throw new Exception("GlobalNotificationService is not initialized.");
 			}
 		}
 	}

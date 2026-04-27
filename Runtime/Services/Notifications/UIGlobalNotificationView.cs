@@ -98,22 +98,22 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!container)
 			{
-				throw new InvalidOperationException("UIGlobalNotificationView requires container reference.");
+				throw new MissingReferenceException("UIGlobalNotificationView requires container reference.");
 			}
 
 			if (!messageText)
 			{
-				throw new InvalidOperationException("UIGlobalNotificationView requires messageText reference.");
+				throw new MissingReferenceException("UIGlobalNotificationView requires messageText reference.");
 			}
 
 			if (!backgroundSizer)
 			{
-				throw new InvalidOperationException("UIGlobalNotificationView requires backgroundSizer reference.");
+				throw new MissingReferenceException("UIGlobalNotificationView requires backgroundSizer reference.");
 			}
 
 			if (!backgroundImage)
 			{
-				throw new InvalidOperationException("UIGlobalNotificationView requires backgroundImage reference.");
+				throw new MissingReferenceException("UIGlobalNotificationView requires backgroundImage reference.");
 			}
 		}
 

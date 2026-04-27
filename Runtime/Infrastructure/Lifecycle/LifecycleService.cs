@@ -196,7 +196,7 @@ namespace PlatformCore.Infrastructure
 			{
 				if (activateOnly && controller is IPreloadable)
 				{
-					throw new InvalidOperationException($"Controller '{controller.GetType().Name}' requires RegisterAsync because it is preloadable.");
+					throw new NotSupportedException($"Controller '{controller.GetType().Name}' requires RegisterAsync because it is preloadable.");
 				}
 
 				if (controller is IActivatable activatable)

@@ -27,7 +27,7 @@ namespace PlatformCore.Services.Notifications
 		{
 			if (!list)
 			{
-				throw new InvalidOperationException("UINotificationsView requires list reference.");
+				throw new MissingReferenceException("UINotificationsView requires list reference.");
 			}
 		}
 	}
