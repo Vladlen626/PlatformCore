@@ -32,7 +32,7 @@ namespace PlatformCore.Infrastructure
 				return service as T;
 			}
 
-			throw new InvalidOperationException($"Service {typeof(T).Name} not registered.");
+			throw new KeyNotFoundException($"Service {typeof(T).Name} not registered.");
 		}
 
 		public bool TryGet<T>(out T result) where T : class, IService

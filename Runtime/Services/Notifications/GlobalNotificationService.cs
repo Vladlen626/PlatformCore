@@ -4,19 +4,23 @@ using Cysharp.Threading.Tasks;
 using PlatformCore.Services.Audio;
 using PlatformCore.Services.Factory;
 using PlatformCore.Services.UI;
+using UnityEngine;
 
 namespace PlatformCore.Services.Notifications
 {
-	public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationService
+	public class GlobalNotificationService : BaseAsyncService, IGlobalNotificationService, IDisposable
 	{
-		private readonly IUIService uiService;
-		private readonly IObjectFactory objectFactory;
-		private readonly IAudioService audioService;
-		private readonly GlobalNotificationServiceOptions options;
+		private readonly IUIService _uiService;
+		private readonly IObjectFactory _objectFactory;
+		private readonly IAudioService _audioService;
+		private readonly GlobalNotificationServiceOptions _options;
 
-		private UIGlobalNotificationView bannerView;
-		private UINotificationsView notificationsView;
-		private UniTask toastQueueTail;
+		private UIGlobalNotificationView _bannerView;
+		private UINotificationsView _notificationsView;
+		private CancellationTokenSource _disposeCts;
+		private UniTask _toastQueueTail;
+		private bool _isInitialized;
+		private bool _isDisposed;
 
 		public GlobalNotificationService(
 			IUIService uiService,
@@ -24,35 +28,36 @@ namespace PlatformCore.Services.Notifications
 			IAudioService audioService,
 			GlobalNotificationServiceOptions options = null)
 		{
-			this.uiService = uiService;
-			this.objectFactory = objectFactory;
-			this.audioService = audioService;
-			this.options = options ?? new GlobalNotificationServiceOptions();
-			toastQueueTail = UniTask.CompletedTask;
+			_uiService = uiService ?? throw new ArgumentNullException(nameof(uiService));
+			_objectFactory = objectFactory ?? throw new ArgumentNullException(nameof(objectFactory));
+			_audioService = audioService;
+			_options = options ?? new GlobalNotificationServiceOptions();
+			_disposeCts = new CancellationTokenSource();
+			_toastQueueTail = UniTask.CompletedTask;
 		}
 
 		protected override async UniTask OnPostInitializeAsync(CancellationToken ct)
 		{
-			if (uiService == null)
-			{
-				return;
-			}
+			ThrowIfDisposed();
+			await _uiService.PreloadAsync<UIGlobalNotificationView>();
+				_bannerView = _uiService.GetWindow<UIGlobalNotificationView>();
+				if (!_bannerView)
+				{
+					throw new MissingReferenceException("UIGlobalNotificationView is required but was not found after preload.");
+				}
 
-			await uiService.PreloadAsync<UIGlobalNotificationView>();
-			bannerView = uiService.GetWindow<UIGlobalNotificationView>();
-			bannerView.gameObject.SetActive(true);
-			if (bannerView)
-			{
-				bannerView.Hide();
-			}
+			await _uiService.PreloadAsync<UINotificationsView>();
+				_notificationsView = _uiService.GetWindow<UINotificationsView>();
+				if (!_notificationsView)
+				{
+					throw new MissingReferenceException("UINotificationsView is required but was not found after preload.");
+				}
 
-			await uiService.PreloadAsync<UINotificationsView>();
-			notificationsView = uiService.GetWindow<UINotificationsView>();
-			notificationsView.gameObject.SetActive(true);
-			if (notificationsView)
-			{
-				notificationsView.Show();
-			}
+			_bannerView.gameObject.SetActive(true);
+			_notificationsView.gameObject.SetActive(true);
+			_bannerView.Hide();
+			_notificationsView.Show();
+			_isInitialized = true;
 		}
 
 		public void ShowBanner(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
@@ -62,18 +67,20 @@ namespace PlatformCore.Services.Notifications
 
 		public async UniTask ShowBannerAsync(string message, float holdSeconds = 0.9f, bool isNegative = false, bool playSound = true)
 		{
-			if (string.IsNullOrWhiteSpace(message) || !bannerView)
+			ThrowIfDisposed();
+			ThrowIfNotInitialized();
+			if (string.IsNullOrWhiteSpace(message))
 			{
 				return;
 			}
 
-			bannerView.Interrupt();
+			_bannerView.Interrupt();
 			if (playSound)
 			{
 				PlayNotificationSound(isNegative);
 			}
 
-			await bannerView.PlayAsync(message, holdSeconds, isNegative);
+			await _bannerView.PlayAsync(message, holdSeconds, isNegative);
 		}
 
 		public void EnqueueToast(string message, bool isNegative = false)
@@ -83,14 +90,16 @@ namespace PlatformCore.Services.Notifications
 
 		public UniTask EnqueueToastAsync(string message, bool isNegative = false)
 		{
+			ThrowIfDisposed();
+			ThrowIfNotInitialized();
 			if (string.IsNullOrWhiteSpace(message))
 			{
 				return UniTask.CompletedTask;
 			}
 
-			var previous = toastQueueTail;
+			var previous = _toastQueueTail;
 			var queued = QueueToastInternal(previous, message, isNegative);
-			toastQueueTail = queued;
+			_toastQueueTail = queued;
 			return queued;
 		}
 
@@ -101,6 +110,8 @@ namespace PlatformCore.Services.Notifications
 
 		public UniTask ShowToastRawImmediateAsync(string message, bool isNegative = false)
 		{
+			ThrowIfDisposed();
+			ThrowIfNotInitialized();
 			if (string.IsNullOrWhiteSpace(message))
 			{
 				return UniTask.CompletedTask;
@@ -109,60 +120,106 @@ namespace PlatformCore.Services.Notifications
 			return ShowToastInternal(message, isNegative);
 		}
 
+		public void Dispose()
+		{
+			if (_isDisposed)
+			{
+				return;
+			}
+
+			_isDisposed = true;
+			_disposeCts.Cancel();
+			_disposeCts.Dispose();
+			_disposeCts = null;
+			_bannerView = null;
+			_notificationsView = null;
+			_toastQueueTail = UniTask.CompletedTask;
+			_isInitialized = false;
+		}
+
 		private async UniTask QueueToastInternal(UniTask previous, string message, bool isNegative)
 		{
+			var disposeToken = _disposeCts.Token;
+
 			try
 			{
 				await previous;
 			}
-			catch (Exception)
+			catch (Exception exception)
 			{
+				Debug.LogError($"[GlobalNotificationService] Previous toast task failed: {exception}");
 			}
 
+			disposeToken.ThrowIfCancellationRequested();
 			await ShowToastInternal(message, isNegative);
 		}
 
 		private async UniTask ShowToastInternal(string message, bool isNegative)
 		{
-			if (!notificationsView || !notificationsView.List || objectFactory == null || string.IsNullOrWhiteSpace(options.ToastItemResourcePath))
+			if (string.IsNullOrWhiteSpace(_options.ToastItemResourcePath))
 			{
-				return;
+				throw new ArgumentException("ToastItemResourcePath is required for notification toasts.", nameof(_options.ToastItemResourcePath));
 			}
 
-			var view = await objectFactory.CreateAsync<UINotificationView>(
-				options.ToastItemResourcePath,
-				UnityEngine.Vector3.zero,
-				UnityEngine.Quaternion.identity,
-				notificationsView.List);
+			var view = await _objectFactory.CreateAsync<UINotificationView>(
+				_options.ToastItemResourcePath,
+				Vector3.zero,
+				Quaternion.identity,
+				_notificationsView.List);
 
 			if (!view)
 			{
-				return;
+				throw new MissingReferenceException("UINotificationView prefab must contain UINotificationView component.");
 			}
-			
-			view.gameObject.SetActive(true);
 
+			view.gameObject.SetActive(true);
 			PlayNotificationSound(isNegative);
-			await view.PlayAsync(message, isNegative);
-			UnityEngine.Object.Destroy(view.gameObject);
+
+			try
+			{
+				await view.PlayAsync(message, isNegative);
+			}
+			finally
+			{
+				if (view)
+				{
+					UnityEngine.Object.Destroy(view.gameObject);
+				}
+			}
 		}
 
 		private void PlayNotificationSound(bool isNegative)
 		{
-			if (audioService == null)
+			if (_audioService == null)
 			{
 				return;
 			}
 
 			var soundEvent = isNegative
-				? options.NegativeNotificationSound
-				: options.PositiveNotificationSound;
+				? _options.NegativeNotificationSound
+				: _options.PositiveNotificationSound;
 			if (string.IsNullOrWhiteSpace(soundEvent))
 			{
 				return;
 			}
 
-			audioService.PlaySound(soundEvent);
+			_audioService.PlaySound(soundEvent);
+		}
+
+		private void ThrowIfDisposed()
+		{
+			if (_isDisposed)
+			{
+				throw new ObjectDisposedException(nameof(GlobalNotificationService));
+			}
+		}
+
+		private void ThrowIfNotInitialized()
+		{
+			if (!_isInitialized)
+			{
+				throw new Exception("GlobalNotificationService is not initialized.");
+			}
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Services.UI;
 using PlatformCore.Services.UI.Styles;
@@ -27,6 +28,7 @@ namespace PlatformCore.Services.Notifications
 
 		public async UniTask PlayAsync(string message, float holdSeconds, bool isNegative = false)
 		{
+			ValidateReferences();
 			if (string.IsNullOrWhiteSpace(message))
 			{
 				return;
@@ -34,10 +36,7 @@ namespace PlatformCore.Services.Notifications
 
 			messageText.text = message;
 			ApplyToneColor(isNegative);
-			if (backgroundSizer)
-			{
-				backgroundSizer.Refresh();
-			}
+			backgroundSizer.Refresh();
 			Show();
 
 			_group.alpha = 0f;
@@ -66,13 +65,9 @@ namespace PlatformCore.Services.Notifications
 			Hide();
 		}
 
-		private void ApplyToneColor(bool isNegative)
-		{
-			backgroundImage.color = (isNegative ? negativeColor : positiveColor).Value;
-		}
-
 		public void Interrupt()
 		{
+			ValidateReferences();
 			animationVersion++;
 			ResetContainerTransform();
 			Hide();
@@ -81,6 +76,7 @@ namespace PlatformCore.Services.Notifications
 		protected override void OnAwake()
 		{
 			base.OnAwake();
+			ValidateReferences();
 			baseAnchoredPosition = container.anchoredPosition;
 			_group.interactable = false;
 			_group.blocksRaycasts = false;
@@ -91,6 +87,34 @@ namespace PlatformCore.Services.Notifications
 			animationVersion++;
 			ResetContainerTransform();
 			base.OnHide();
+		}
+
+		private void ApplyToneColor(bool isNegative)
+		{
+			backgroundImage.color = (isNegative ? negativeColor : positiveColor).Value;
+		}
+
+		private void ValidateReferences()
+		{
+			if (!container)
+			{
+				throw new MissingReferenceException("UIGlobalNotificationView requires container reference.");
+			}
+
+			if (!messageText)
+			{
+				throw new MissingReferenceException("UIGlobalNotificationView requires messageText reference.");
+			}
+
+			if (!backgroundSizer)
+			{
+				throw new MissingReferenceException("UIGlobalNotificationView requires backgroundSizer reference.");
+			}
+
+			if (!backgroundImage)
+			{
+				throw new MissingReferenceException("UIGlobalNotificationView requires backgroundImage reference.");
+			}
 		}
 
 		private void ResetContainerTransform()
