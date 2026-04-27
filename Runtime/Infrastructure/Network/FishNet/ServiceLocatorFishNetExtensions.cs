@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using PlatformCore.Services;
 using PlatformCore.Services.Network;
 
@@ -22,10 +21,10 @@ namespace PlatformCore.Infrastructure.Network.FishNet
 			var networkSessionService = new NetworkSessionService(networkSessionBridge, loggerService);
 			serviceLocator.Register<INetworkSessionService, NetworkSessionService>(networkSessionService);
 			var networkSessionLifecycleController = new NetworkSessionLifecycleController(networkSessionService);
-			lifecycleService.RegisterAsync(networkSessionLifecycleController).Forget();
+			lifecycleService.Register(networkSessionLifecycleController);
 
 			var runtimeSessionAdapter = new FishNetRuntimeSessionAdapter(networkSessionBridge, loggerService);
-			lifecycleService.RegisterAsync(runtimeSessionAdapter).Forget();
+			lifecycleService.Register(runtimeSessionAdapter);
 
 			return networkSessionService;
 		}

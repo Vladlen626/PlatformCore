@@ -15,6 +15,21 @@ namespace PlatformCore.Infrastructure
 		private readonly List<ILateUpdatable> _lateUpdatables = new List<ILateUpdatable>();
 		private bool _isDisposed;
 
+		public void Register(IBaseController controller)
+		{
+			if (_isDisposed)
+			{
+				return;
+			}
+
+			if (controller == null)
+			{
+				throw new ArgumentNullException(nameof(controller));
+			}
+
+			RegisterInternal(controller, activateOnly: true);
+		}
+
 		public async UniTask RegisterAsync(IBaseController controller)
 		{
 			if (_isDisposed)
@@ -27,56 +42,17 @@ namespace PlatformCore.Infrastructure
 				throw new ArgumentNullException(nameof(controller));
 			}
 
-			// Один и тот же инстанс контроллера можно зарегистрировать только один раз.
-			if (_managedObjectsSet.Add(controller) == false)
+			if (_managedObjectsSet.Contains(controller))
 			{
 				return;
 			}
 
-			var activated = false;
-
-			try
+			if (controller is IPreloadable preloadable)
 			{
-				if (controller is IPreloadable preloadable)
-				{
-					await preloadable.PreloadAsync();
-				}
-
-				if (controller is IActivatable activatable)
-				{
-					activatable.Activate();
-					activated = true;
-				}
-
-				_managedObjects.Add(controller);
-
-				// Контроллер может реализовывать сразу несколько update-интерфейсов.
-				if (controller is IUpdatable updatable)
-				{
-					_updatables.Add(updatable);
-				}
-
-				if (controller is IFixedUpdatable fixedUpdatable)
-				{
-					_fixedUpdatables.Add(fixedUpdatable);
-				}
-
-				if (controller is ILateUpdatable lateUpdatable)
-				{
-					_lateUpdatables.Add(lateUpdatable);
-				}
+				await preloadable.PreloadAsync();
 			}
-			catch
-			{
-				_managedObjectsSet.Remove(controller);
 
-				if (activated && controller is IDeactivatable deactivatable)
-				{
-					deactivatable.Deactivate();
-				}
-
-				throw;
-			}
+			RegisterInternal(controller, activateOnly: false);
 		}
 
 		public void Unregister(IBaseController controller)
@@ -86,7 +62,6 @@ namespace PlatformCore.Infrastructure
 				return;
 			}
 
-			// Idempotent Unregister: повторный вызов безопасно игнорируется.
 			if (_managedObjectsSet.Remove(controller) == false)
 			{
 				return;
@@ -115,69 +90,32 @@ namespace PlatformCore.Infrastructure
 			}
 		}
 
-		public async UniTask RegisterControllersGroupAsync(List<IBaseController> controllersList)
+		public async UniTask RegisterControllersGroupAsync(IEnumerable<IBaseController> controllers)
 		{
 			if (_isDisposed)
 			{
 				return;
 			}
 
-			if (controllersList == null)
+			if (controllers == null)
 			{
-				throw new ArgumentNullException(nameof(controllersList));
+				throw new ArgumentNullException(nameof(controllers));
 			}
 
-			var tasks = new List<UniTask>();
-			foreach (var controller in controllersList)
+			foreach (var controller in controllers)
 			{
-				tasks.Add(RegisterAsync(controller));
+				await RegisterAsync(controller);
 			}
-
-			await UniTask.WhenAll(tasks);
 		}
 
-		public async UniTask RegisterControllersGroupAsync(IBaseController[] controllersArray)
+		public void UnregisterControllersGroup(IEnumerable<IBaseController> controllers)
 		{
-			if (_isDisposed)
+			if (controllers == null)
 			{
 				return;
 			}
 
-			if (controllersArray == null)
-			{
-				throw new ArgumentNullException(nameof(controllersArray));
-			}
-
-			var tasks = new List<UniTask>();
-			foreach (var controller in controllersArray)
-			{
-				tasks.Add(RegisterAsync(controller));
-			}
-
-			await UniTask.WhenAll(tasks);
-		}
-
-		public void UnregisterControllersGroup(List<IBaseController> controllersList)
-		{
-			if (controllersList == null)
-			{
-				return;
-			}
-
-			foreach (var controller in controllersList)
-			{
-				Unregister(controller);
-			}
-		}
-
-		public void UnregisterControllersGroup(IBaseController[] controllersArray)
-		{
-			if (controllersArray == null)
-			{
-				return;
-			}
-
-			foreach (var controller in controllersArray)
+			foreach (var controller in controllers)
 			{
 				Unregister(controller);
 			}
@@ -194,7 +132,6 @@ namespace PlatformCore.Infrastructure
 			}
 		}
 
-		// ReSharper disable Unity.PerformanceAnalysis
 		public void FixedUpdate(float fixedDeltaTime)
 		{
 			for (int i = _fixedUpdatables.Count - 1; i >= 0; i--)
@@ -224,8 +161,6 @@ namespace PlatformCore.Infrastructure
 				return;
 			}
 
-			// Семантика Dispose: для каждого зарегистрированного контроллера вызываем Deactivate (если есть),
-			// затем Dispose (если реализован), и только после этого очищаем все внутренние коллекции сервиса.
 			for (int i = _managedObjects.Count - 1; i >= 0; i--)
 			{
 				var obj = _managedObjects[i];
@@ -247,6 +182,55 @@ namespace PlatformCore.Infrastructure
 			_fixedUpdatables.Clear();
 			_lateUpdatables.Clear();
 			_isDisposed = true;
+		}
+
+		private void RegisterInternal(IBaseController controller, bool activateOnly)
+		{
+			if (_managedObjectsSet.Add(controller) == false)
+			{
+				return;
+			}
+
+			var activated = false;
+			try
+			{
+				if (activateOnly && controller is IPreloadable)
+				{
+					throw new InvalidOperationException($"Controller '{controller.GetType().Name}' requires RegisterAsync because it is preloadable.");
+				}
+
+				if (controller is IActivatable activatable)
+				{
+					activatable.Activate();
+					activated = true;
+				}
+
+				_managedObjects.Add(controller);
+				if (controller is IUpdatable updatable)
+				{
+					_updatables.Add(updatable);
+				}
+
+				if (controller is IFixedUpdatable fixedUpdatable)
+				{
+					_fixedUpdatables.Add(fixedUpdatable);
+				}
+
+				if (controller is ILateUpdatable lateUpdatable)
+				{
+					_lateUpdatables.Add(lateUpdatable);
+				}
+			}
+			catch
+			{
+				_managedObjectsSet.Remove(controller);
+				if (activated && controller is IDeactivatable deactivatable)
+				{
+					deactivatable.Deactivate();
+				}
+
+				throw;
+			}
 		}
 	}
 }

@@ -13,8 +13,6 @@ namespace PlatformCore.Services.Pool
 
 		void Return<T>(string key, T component) where T : Component;
 		
-		void ReturnDelayed<T>(string key, T component, float delay) where T : Component;
-		
 		(int active, int inactive) GetPoolStats<T>(string key) where T : Component;
 		
 		void ClearPool<T>(string key) where T : Component;

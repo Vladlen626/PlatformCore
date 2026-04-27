@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using PlatformCore.Services.UI;
 using PlatformCore.Services.UI.Styles;
@@ -16,7 +17,6 @@ namespace PlatformCore.Services.Notifications
 		[SerializeField] private float smoothDuration = 0.5f;
 		[SerializeField] private float fadeDuration = 0.3f;
 		[SerializeField] private float showDelay = 2f;
-
 		[SerializeField] private TextMeshProUGUI text;
 		[SerializeField] private ColorStyleRef positiveColor;
 		[SerializeField] private ColorStyleRef negativeColor;
@@ -26,12 +26,10 @@ namespace PlatformCore.Services.Notifications
 
 		public async UniTask PlayAsync(string value, bool isNegative = false)
 		{
+			ValidateReferences();
 			text.text = value;
 			ApplyToneColor(isNegative);
-			if (backgroundSizer)
-			{
-				backgroundSizer.Refresh();
-			}
+			backgroundSizer.Refresh();
 
 			Show();
 			_group.alpha = 0f;
@@ -41,26 +39,14 @@ namespace PlatformCore.Services.Notifications
 			contentRoot.anchoredPosition = _basePosition + Vector2.down * initialShift;
 
 			var version = ++_animationVersion;
-			await AnimateAsync(
-				smoothDuration,
-				0f,
-				1f,
-				_basePosition + Vector2.down * initialShift,
-				_basePosition,
-				version);
+			await AnimateAsync(smoothDuration, 0f, 1f, _basePosition + Vector2.down * initialShift, _basePosition, version);
 			await UniTask.Delay((int)(Mathf.Max(0f, showDelay) * 1000f), DelayType.UnscaledDeltaTime);
 			if (version != _animationVersion)
 			{
 				return;
 			}
 
-			await AnimateAsync(
-				fadeDuration,
-				1f,
-				0f,
-				_basePosition,
-				new Vector2(_basePosition.x + initialShift, _basePosition.y),
-				version);
+			await AnimateAsync(fadeDuration, 1f, 0f, _basePosition, new Vector2(_basePosition.x + initialShift, _basePosition.y), version);
 			if (version != _animationVersion)
 			{
 				return;
@@ -73,6 +59,7 @@ namespace PlatformCore.Services.Notifications
 		protected override void OnAwake()
 		{
 			base.OnAwake();
+			ValidateReferences();
 			_basePosition = contentRoot.anchoredPosition;
 			_group.alpha = 0f;
 			text.gameObject.SetActive(false);
@@ -90,6 +77,29 @@ namespace PlatformCore.Services.Notifications
 		private void ApplyToneColor(bool isNegative)
 		{
 			backgroundImage.color = (isNegative ? negativeColor : positiveColor).Value;
+		}
+
+		private void ValidateReferences()
+		{
+			if (!contentRoot)
+			{
+				throw new InvalidOperationException("UINotificationView requires contentRoot reference.");
+			}
+
+			if (!backgroundSizer)
+			{
+				throw new InvalidOperationException("UINotificationView requires backgroundSizer reference.");
+			}
+
+			if (!backgroundImage)
+			{
+				throw new InvalidOperationException("UINotificationView requires backgroundImage reference.");
+			}
+
+			if (!text)
+			{
+				throw new InvalidOperationException("UINotificationView requires text reference.");
+			}
 		}
 
 		private async UniTask AnimateAsync(float duration, float fromAlpha, float toAlpha, Vector2 fromPos, Vector2 toPos, int version)
